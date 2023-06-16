@@ -49,6 +49,7 @@ namespace crypto::binfhe::detail
 				throw OperationNotSupported("Operation not supported for BinFHE");
 			default:
 				assert(false && "Wrong argument count for operation");
+				return nullptr;
 		}
 	}
 
@@ -75,6 +76,7 @@ namespace crypto::binfhe::detail
 				break;
 			default:
 				assert(false && "Wrong argument count for operation");
+				return nullptr;
 		}
 
 		return std::make_unique<CryptoValueImpl>(keyset_.context().EvalBinGate(gate, in_a.value(), in_b.value()));
@@ -89,6 +91,7 @@ namespace crypto::binfhe::detail
 				return std::make_unique<CryptoValueImpl>(keyset_.context().EvalNOT(in.value()));
 			default:
 				assert(false && "Wrong argument count for operation");
+				return nullptr;
 		}
 	}
 
