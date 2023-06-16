@@ -2,3 +2,15 @@ on:
   push:
     branches:
       - master
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: 'Build worker'
+    uses: ./.github/workflows/build.yml
+    with:
+      deploy-artifacts: true
+
+  build-test-tools:
+    name: 'Build test tools'
+    uses: ./.github/workflows/build-test-tools.yml
