@@ -1,0 +1,57 @@
+name: Build
+
+on:
+  pull_request:
+  workflow_call:
+    inputs:
+      deploy-artifacts:
+        type: boolean
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Install gcc
+        run: |
+          sudo apt update
+          sudo apt install gcc-11 g++-11
+        shell: bash
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install build-essential autoconf libtool pkg-config libomp-dev ninja-build
+        shell: bash
+
+      - uses: ./proto/action/install-grpc
+        with:
+          prefix: ${{ github.workspace }}/external/grpc
+
+      - uses: ./common/action/install-openfhe
+        with:
+          prefix: ${{ github.workspace }}/external/openfhe
+
+      - name: Create Build Environment
+        run: cmake -E make_directory ${{github.workspace}}/build
+
+      - name: Configure CMake
+        working-directory: ${{github.workspace}}/build
+        run: cmake -GNinja $GITHUB_WORKSPACE -DCMAKE_BUILD_TYPE=Release
+        env:
+          CC: gcc-11
+          CXX: g++-11
+
+      - name: Build
+        working-directory: ${{ github.workspace }}/build
+        run: cmake --build . --config Release
+
+      - name: Upload artifacts
+        if: inputs.deploy-artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: executor-worker
+          path: ${{ github.workspace }}/build/executor_worker
