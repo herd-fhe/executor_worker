@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-8-cores
     steps:
       - uses: actions/checkout@v2
         with:
@@ -30,10 +30,12 @@ jobs:
       - uses: ./proto/action/install-grpc
         with:
           prefix: ${{ github.workspace }}/external/grpc
+          parallel: '16'
 
       - uses: ./common/action/install-openfhe
         with:
           prefix: ${{ github.workspace }}/external/openfhe
+          parallel: '16'
 
       - name: Create Build Environment
         run: cmake -E make_directory ${{github.workspace}}/build
