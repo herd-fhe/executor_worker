@@ -1,0 +1,12 @@
+[submodule "third-party/spdlog"]
+	path = third-party/spdlog
+	url = https://github.com/gabime/spdlog.git
+[submodule "proto"]
+	path = proto
+	url = https://github.com/herd-fhe/herd_proto
+[submodule "mappers"]
+	path = mappers
+	url = https://github.com/herd-fhe/dto_mappers.git
+[submodule "common"]
+	path = common
+	url = https://github.com/herd-fhe/herd_common.git

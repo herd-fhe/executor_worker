@@ -1,0 +1,9 @@
+#ifndef EXECUTOR_WORKER_CONFIG_LOADER_HPP
+#define EXECUTOR_WORKER_CONFIG_LOADER_HPP
+
+#include "config.hpp"
+
+
+Config load_config();
+
+#endif //EXECUTOR_WORKER_CONFIG_LOADER_HPP
