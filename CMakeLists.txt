@@ -69,12 +69,6 @@ find_package(PkgConfig REQUIRED)
 ## OpenFHE
 find_package(OpenFHE REQUIRED)
 
-## SQLite
-find_package(SQLite3)
-
-## Sodium
-pkg_check_modules(SODIUM REQUIRED libsodium)
-
 ## Spdlog
 add_subdirectory(third-party/spdlog EXCLUDE_FROM_ALL)
 
@@ -174,8 +168,6 @@ target_link_libraries(
         OPENFHEbinfhe
         OpenMP::OpenMP_CXX
 
-        ${SODIUM_LIBRARIES}
-
         spdlog::spdlog_header_only
 
         herd_proto
@@ -191,7 +183,6 @@ target_include_directories(
         ${OpenFHE_INCLUDE}/core
         ${OpenFHE_INCLUDE}/pke
         ${OpenFHE_INCLUDE}/binfhe
-        ${SODIUM_INCLUDE_DIRS}
         ${UUID_INCLUDE_DIRS}
 )
 
