@@ -11,15 +11,15 @@ namespace crypto::binfhe::detail
 	class CryptoValueImpl final: public CryptoValue
 	{
 	public:
-		explicit CryptoValueImpl(lbcrypto::LWECiphertext&& ciphertext);
+		explicit CryptoValueImpl(lbcrypto::ConstLWECiphertext&& ciphertext);
 
-		[[nodiscard]] lbcrypto::LWECiphertext value();
+		[[nodiscard]] lbcrypto::ConstLWECiphertext value();
 		[[nodiscard]] std::shared_ptr<const lbcrypto::LWECiphertextImpl> value() const;
 
 		void serialize(std::ostream& out_stream) const override;
 
 	private:
-		lbcrypto::LWECiphertext ciphertext_;
+		lbcrypto::ConstLWECiphertext ciphertext_;
 	};
 }
 

@@ -19,3 +19,95 @@ jobs:
   build-test-tools:
     name: 'Build test tools'
     uses: ./.github/workflows/build-test-tools.yml
+
+  test:
+    name: 'Run tests'
+    needs: [build, build-test-tools]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Install gcc
+        run: |
+          sudo apt update
+          sudo apt install gcc-11 g++-11
+        shell: bash
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install build-essential autoconf python3.11 python3-poetry libtool pkg-config libomp-dev libprotobuf-dev ninja-build clang-15 libclang-15-dev
+        shell: bash
+
+      - uses: ./proto/action/install-grpc
+        with:
+          prefix: ${{github.workspace}}/external/grpc
+
+      - uses: ./common/action/install-openfhe
+        with:
+          prefix: ${{ github.workspace }}/external/openfhe
+          parallel: '4'
+
+      - name: Download worker artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: executor-worker
+          path: ${{github.workspace}}/worker_home
+
+      - name: Download test utility artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: test-utils
+          path: ${{github.workspace}}/test_home
+
+      - name: Chmod utilities
+        working-directory: ${{github.workspace}}/test_home
+        run: |
+          chmod +x data_generator
+          chmod +x dataframe_decryptor
+        shell: bash
+
+      - name: Spin up worker
+        env:
+          KEY_BASE_DIR: ${{github.workspace}}/worker_home/keys
+          STORAGE_BASE_DIR: ${{github.workspace}}/worker_home/data_frames
+          WORKER_PORT: 5555
+        run: |
+          cd ${{github.workspace}}/worker_home
+          mkdir keys
+          mkdir data_frames
+          chmod +x executor_worker
+          ./executor_worker&
+          sleep 5
+        shell: bash
+
+      - name: Install python dependencies
+        working-directory: ${{github.workspace}}/test
+        # temporary workaround (poetry lock)
+        run: |
+          rm poetry.lock
+          poetry install --no-interaction --no-root
+        shell: bash
+
+      - name: Build grpc stubs
+        working-directory: ${{github.workspace}}/test
+        run: |
+          source $(poetry env info --path)/bin/activate
+          cd ${{github.workspace}}/test
+          make
+        shell: bash
+
+      - name: Run tests
+        working-directory: ${{github.workspace}}/test
+        env:
+          TEST_HOME: ${{github.workspace}}/test_home
+          KEY_BASE_DIR: ${{github.workspace}}/worker_home/keys
+          STORAGE_BASE_DIR: ${{github.workspace}}/worker_home/data_frames
+          WORKER_PORT: 5555
+        run: | 
+          source $(poetry env info --path)/bin/activate
+          pytest
+        shell: bash

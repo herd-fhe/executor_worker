@@ -104,6 +104,10 @@ namespace crypto::binfhe::detail
 	{
 		const auto& in = dynamic_cast<const CryptoValueImpl&>(input);
 
-		return std::make_unique<CryptoValueImpl>(keyset_.context().Bootstrap(in.value()));
+		auto copy = in.value();
+
+		// it's probably better without bootstraping
+//		return std::make_unique<CryptoValueImpl>(keyset_.context().Bootstrap(in.value()));
+		return std::make_unique<CryptoValueImpl>(std::move(copy));
 	}
 }

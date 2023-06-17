@@ -11,7 +11,7 @@ namespace data
 	void DataFrameOutput::write_row(std::vector<crypto::CryptoVector>&& row)
 	{
 		std::stringstream row_buffer;
-		const auto start = row_buffer.tellg();
+		const auto start = row_buffer.tellp();
 
 		for(const auto& crypto_vector: row)
 		{
@@ -20,10 +20,10 @@ namespace data
 				value->serialize(row_buffer);
 			}
 		}
-		const auto end = row_buffer.tellg();
+		const auto end = row_buffer.tellp();
 
 		const auto size = static_cast<uint32_t>(end - start);
-		data_frame_stream_.write(reinterpret_cast<char*>(size), sizeof(size));
+		data_frame_stream_.write(reinterpret_cast<const char*>(&size), sizeof(size));
 
 		row_buffer.seekg(start);
 

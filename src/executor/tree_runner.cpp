@@ -3,6 +3,8 @@
 #include <cassert>
 #include <utility>
 
+#include <spdlog/spdlog.h>
+
 #include "executor/exception.hpp"
 
 
@@ -144,6 +146,7 @@ void TreeRunner::mark_node_completed(TreeRunner::graph_node_t node) noexcept
 
 	//todo: maybe wake only added number of tasks??
 	consumers_cv_.notify_all();
+	completion_point_->count_down();
 }
 
 void TreeRunner::evaluate_constant(const TreeRunner::graph_node_t& graph_node)
@@ -230,18 +233,22 @@ void TreeRunner::evaluate(const TreeRunner::graph_node_t& graph_node)
 
 	if(std::holds_alternative<herd::common::ConstantNode>(node))
 	{
+		spdlog::trace("Evaluating constant node");
 		evaluate_constant(graph_node);
 	}
 	else if(std::holds_alternative<herd::common::InputNode>(node))
 	{
+		spdlog::trace("Evaluating input node");
 		evaluate_input(graph_node);
 	}
 	else if(std::holds_alternative<herd::common::OperationNode>(node))
 	{
+		spdlog::trace("Evaluating operation node");
 		evaluate_operation(graph_node);
 	}
 	else if(std::holds_alternative<herd::common::OutputNode>(node))
 	{
+		spdlog::trace("Evaluating output node");
 		evaluate_output(graph_node);
 	}
 	else
