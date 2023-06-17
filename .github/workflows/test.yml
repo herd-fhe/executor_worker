@@ -39,12 +39,17 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install build-essential autoconf python3-poetry libtool pkg-config libomp-dev libprotobuf-dev ninja-build clang-15 libclang-15-dev
+          sudo apt install build-essential autoconf python3.11 python3-poetry libtool pkg-config libomp-dev libprotobuf-dev ninja-build clang-15 libclang-15-dev
         shell: bash
 
       - uses: ./proto/action/install-grpc
         with:
           prefix: ${{github.workspace}}/external/grpc
+
+      - uses: ./common/action/install-openfhe
+        with:
+          prefix: ${{ github.workspace }}/external/openfhe
+          parallel: '4'
 
       - name: Download worker artifact
         uses: actions/download-artifact@v3
