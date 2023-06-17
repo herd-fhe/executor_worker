@@ -39,7 +39,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install build-essential autoconf libtool pkg-config libomp-dev libprotobuf-dev ninja-build clang-15 libclang-15-dev
+          sudo apt install build-essential autoconf python3-poetry libtool pkg-config libomp-dev libprotobuf-dev ninja-build clang-15 libclang-15-dev
         shell: bash
 
       - uses: ./proto/action/install-grpc
@@ -57,3 +57,37 @@ jobs:
         with:
           name: test-utils
           path: ${{github.workspace}}/test_home
+
+      - name: Spin up worker
+        env:
+          KEY_BASE_DIR: ${{github.workspace}}/worker_home/keys
+          STORAGE_BASE_DIR: ${{github.workspace}}/worker_home/data_frames
+          WORKER_PORT: 5555
+        run: |
+          cd ${{github.workspace}}/worker_home
+          mkdir keys
+          mkdir data_frames
+          ./executor_worker&
+          sleep 5
+        shell: bash
+
+      - name: Install python dependencies
+        working-directory: ${{github.workspace}}/test
+        run: poetry install --no-interaction --no-root
+        shell: bash
+
+      - name: Build grpc stubs
+        working-directory: ${{github.workspace}}/test
+        run: |
+          poetry shell
+          make
+        shell: bash
+
+#      - name: Run tests
+#        env:
+#          TEST_HOME: ${{github.workspace}}/test_home
+#          KEY_BASE_DIR: ${{github.workspace}}/worker_home/keys
+#          STORAGE_BASE_DIR: ${{github.workspace}}/worker_home/data_frames
+#          WORKER_PORT: 5555
+#        run: |
+#          pytest
