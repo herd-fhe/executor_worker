@@ -67,6 +67,7 @@ jobs:
           cd ${{github.workspace}}/worker_home
           mkdir keys
           mkdir data_frames
+          chmod +x executor_worker
           ./executor_worker&
           sleep 5
         shell: bash
