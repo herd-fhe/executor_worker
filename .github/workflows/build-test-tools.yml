@@ -48,7 +48,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: table-decryptor
+          name: test-utils
           path: |
             ${{ github.workspace }}/build/table_decryptor
             ${{ github.workspace }}/build/data_generator
