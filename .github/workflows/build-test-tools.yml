@@ -46,7 +46,6 @@ jobs:
         run: cmake --build . --config Release
 
       - name: Upload artifacts
-        if: inputs.deploy-artifacts
         uses: actions/upload-artifact@v3
         with:
           name: table-decryptor
