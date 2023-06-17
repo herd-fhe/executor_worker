@@ -1,5 +1,6 @@
 #include <grpcpp/grpcpp.h>
 #include <spdlog/spdlog.h>
+#include <spdlog/cfg/env.h>
 
 #include "util/config_loader.hpp"
 #include "controller/worker_controller.hpp"
@@ -7,8 +8,9 @@
 
 int main()
 {
-	Config config = load_config();
+	spdlog::cfg::load_env_levels();
 
+	Config config = load_config();
 	WorkerController worker_controller{config};
 
 	grpc::ServerBuilder builder;

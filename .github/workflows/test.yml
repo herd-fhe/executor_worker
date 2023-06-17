@@ -63,6 +63,13 @@ jobs:
           name: test-utils
           path: ${{github.workspace}}/test_home
 
+      - name: Chmod utilities
+        working-directory: ${{github.workspace}}/test_home
+        run: |
+          chmod +x data_generator
+          chmod +x dataframe_decryptor
+        shell: bash
+
       - name: Spin up worker
         env:
           KEY_BASE_DIR: ${{github.workspace}}/worker_home/keys
@@ -93,11 +100,14 @@ jobs:
           make
         shell: bash
 
-#      - name: Run tests
-#        env:
-#          TEST_HOME: ${{github.workspace}}/test_home
-#          KEY_BASE_DIR: ${{github.workspace}}/worker_home/keys
-#          STORAGE_BASE_DIR: ${{github.workspace}}/worker_home/data_frames
-#          WORKER_PORT: 5555
-#        run: |
-#          pytest
+      - name: Run tests
+        working-directory: ${{github.workspace}}/test
+        env:
+          TEST_HOME: ${{github.workspace}}/test_home
+          KEY_BASE_DIR: ${{github.workspace}}/worker_home/keys
+          STORAGE_BASE_DIR: ${{github.workspace}}/worker_home/data_frames
+          WORKER_PORT: 5555
+        run: | 
+          source $(poetry env info --path)/bin/activate
+          pytest
+        shell: bash

@@ -1,14 +1,16 @@
 #include "crypto/binfhe/detail/crypto_value.hpp"
 
+#include <binfhecontext-ser.h>
+
 
 namespace crypto::binfhe::detail
 {
-	CryptoValueImpl::CryptoValueImpl(lbcrypto::LWECiphertext&& ciphertext)
-	:	ciphertext_(std::move(ciphertext))
+	CryptoValueImpl::CryptoValueImpl(lbcrypto::ConstLWECiphertext&& ciphertext)
+	:	ciphertext_(ciphertext)
 	{
 	}
 
-	lbcrypto::LWECiphertext CryptoValueImpl::value()
+	lbcrypto::ConstLWECiphertext CryptoValueImpl::value()
 	{
 		return ciphertext_;
 	}
@@ -20,6 +22,6 @@ namespace crypto::binfhe::detail
 
 	void CryptoValueImpl::serialize(std::ostream& out_stream) const
 	{
-		static_cast<void>(out_stream);
+		lbcrypto::Serial::Serialize(ciphertext_, out_stream, lbcrypto::SerType::BINARY);
 	}
 }

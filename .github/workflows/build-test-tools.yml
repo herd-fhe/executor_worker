@@ -50,5 +50,5 @@ jobs:
         with:
           name: test-utils
           path: |
-            ${{ github.workspace }}/build/table_decryptor
+            ${{ github.workspace }}/build/dataframe_decryptor
             ${{ github.workspace }}/build/data_generator

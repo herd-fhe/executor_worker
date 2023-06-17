@@ -20,7 +20,7 @@ namespace crypto
 	std::vector<CryptoVector> Crypto::load_row_from_stream(std::istream& stream, const std::vector<unsigned int>& columns)
 	{
 		uint32_t row_size = 0;
-		stream.read(reinterpret_cast<char*>(row_size), sizeof(uint32_t));
+		stream.read(reinterpret_cast<char*>(&row_size), sizeof(uint32_t));
 		const auto pos = stream.tellg();
 
 		std::vector<CryptoVector> vectors;
@@ -36,6 +36,6 @@ namespace crypto
 			throw CryptoStreamCorrupted("Crypto stream corrupted - wrong row size");
 		}
 
-		return std::vector<CryptoVector>();
+		return vectors;
 	}
 }
