@@ -48,4 +48,6 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: table-decryptor
-          path: ${{ github.workspace }}/build/table_decryptor
+          path: |
+            ${{ github.workspace }}/build/table_decryptor
+            ${{ github.workspace }}/build/data_generator

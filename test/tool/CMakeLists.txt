@@ -54,28 +54,28 @@ find_package(OpenFHE REQUIRED)
 find_package(Threads REQUIRED)
 find_package(OpenMP REQUIRED)
 
-add_executable(table_decryptor)
+add_executable(dataframe_decryptor)
 
 target_sources(
-        table_decryptor
+        dataframe_decryptor
         PRIVATE
-        table_decryptor.cpp
+        dataframe_decryptor.cpp
 )
 
 target_compile_definitions(
-        table_decryptor
+        dataframe_decryptor
         PUBLIC
         MATHBACKEND=2
 )
 
 target_link_libraries(
-        table_decryptor
+        dataframe_decryptor
         PRIVATE
         warnings_target
 )
 
 target_link_libraries(
-        table_decryptor
+        dataframe_decryptor
         PRIVATE
         pthread
 
@@ -85,7 +85,47 @@ target_link_libraries(
 )
 
 target_include_directories(
-        table_decryptor
+        dataframe_decryptor
+        SYSTEM PRIVATE
+        ${OpenFHE_INCLUDE}
+        ${OpenFHE_INCLUDE}/third-party/include
+        ${OpenFHE_INCLUDE}/core
+        ${OpenFHE_INCLUDE}/pke
+        ${OpenFHE_INCLUDE}/binfhe
+)
+
+add_executable(data_generator)
+
+target_sources(
+        data_generator
+        PRIVATE
+        data_generator.cpp
+)
+
+target_compile_definitions(
+        data_generator
+        PUBLIC
+        MATHBACKEND=2
+)
+
+target_link_libraries(
+        dataframe_decryptor
+        PRIVATE
+        warnings_target
+)
+
+target_link_libraries(
+        data_generator
+        PRIVATE
+        pthread
+
+        OPENFHEcore
+        OPENFHEbinfhe
+        OpenMP::OpenMP_CXX
+)
+
+target_include_directories(
+        data_generator
         SYSTEM PRIVATE
         ${OpenFHE_INCLUDE}
         ${OpenFHE_INCLUDE}/third-party/include
