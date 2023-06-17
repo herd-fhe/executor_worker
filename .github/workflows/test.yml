@@ -1,3 +1,5 @@
+name: Component tests
+
 on:
   push:
     branches:
