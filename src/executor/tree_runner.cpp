@@ -220,7 +220,7 @@ void TreeRunner::evaluate_output(const TreeRunner::graph_node_t& graph_node)
 {
 	if(graph_node.parents().size() != 1)
 	{
-		throw WrongArgumentsCount("Wrong arguments count for input");
+		throw WrongArgumentsCount("Wrong arguments count for output");
 	}
 
 	const auto& output_node = std::get<herd::common::OutputNode>(graph_node.value()->node);
