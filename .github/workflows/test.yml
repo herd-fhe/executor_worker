@@ -47,13 +47,13 @@ jobs:
           prefix: ${{github.workspace}}/external/grpc
 
       - name: Download worker artifact
-        uses: actions/download-artifacts@3
+        uses: actions/download-artifact@v3
         with:
           name: executor-worker
           path: ${{github.workspace}}/worker_home
 
       - name: Download test utility artifacts
-        uses: actions/download-artifacts@3
+        uses: actions/download-artifact@v3
         with:
           name: test-utils
           path: ${{github.workspace}}/test_home
