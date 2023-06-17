@@ -79,15 +79,17 @@ jobs:
 
       - name: Install python dependencies
         working-directory: ${{github.workspace}}/test
+        # temporary workaround (poetry lock)
         run: |
-          poetry self update
+          rm poetry.lock
           poetry install --no-interaction --no-root
         shell: bash
 
       - name: Build grpc stubs
         working-directory: ${{github.workspace}}/test
         run: |
-          poetry shell
+          source $(poetry env info --path)/bin/activate
+          cd ${{github.workspace}}/test
           make
         shell: bash
 
