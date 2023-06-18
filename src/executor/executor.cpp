@@ -50,5 +50,5 @@ void Executor::process_row()
 	auto row = input_->read_row(*crypto_);
 	auto output_row = tree_runner_.execute(circuit_, std::move(row));
 	circuit_.reset_circuit();
-	output_->write_row(std::move(output_row));
+	output_->write_row(output_row, *crypto_);
 }

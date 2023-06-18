@@ -19,9 +19,4 @@ namespace crypto::binfhe::detail
 	{
 		return ciphertext_;
 	}
-
-	void CryptoValueImpl::serialize(std::ostream& out_stream) const
-	{
-		lbcrypto::Serial::Serialize(ciphertext_, out_stream, lbcrypto::SerType::BINARY);
-	}
 }

@@ -8,6 +8,7 @@
 #include "data_frame/data_frame.hpp"
 #include "executor/exception.hpp"
 #include "executor/executor.hpp"
+#include "herd/common/model/exception.hpp"
 #include "mapper/circuit.hpp"
 
 
@@ -35,13 +36,24 @@ grpc::Status WorkerController::run([[maybe_unused]] ::grpc::ServerContext* conte
 	catch(const std::runtime_error& error)
 	{
 		spdlog::error(error.what());
-		return grpc::Status(grpc::INVALID_ARGUMENT, error.what());
+		return { grpc::INVALID_ARGUMENT, error.what() };
 	}
 
 	auto crypto = crypto::CryptoFactory::create_crypto(crypto_key_ptr, session_uuid, config_.key_base_dir);
 	auto circuit = mapper::to_model(request->circuit());
-	auto input_data_frame = data::load_input(input_data_frame_ptr, circuit.input, session_uuid, config_.storage_base_dir);
-	auto output_data_frame = data::load_output(output_data_frame_ptr, circuit.output, session_uuid, config_.storage_base_dir);
+
+	std::unique_ptr<data::DataFrameInput> input_data_frame{};
+	std::unique_ptr<data::DataFrameOutput> output_data_frame{};
+	try
+	{
+		input_data_frame = data::load_input(input_data_frame_ptr, circuit.input, session_uuid, config_.storage_base_dir);
+		output_data_frame = data::load_output(output_data_frame_ptr, circuit.output, session_uuid, config_.storage_base_dir);
+	}
+	catch(const herd::common::IOError& error)
+	{
+		spdlog::error(error.what());
+		return { grpc::INVALID_ARGUMENT, error.what() };
+	}
 
 	auto executor = Executor();
 	executor.set_crypto(std::move(crypto));

@@ -168,6 +168,20 @@ void TreeRunner::evaluate_input(const TreeRunner::graph_node_t& graph_node)
 	}
 
 	const auto& input_node = std::get<herd::common::InputNode>(graph_node.value()->node);
+
+	const auto tuple_index = input_node.tuple_index;
+	const auto bit_index = input_node.bit_index;
+
+	if(input_.size() <= tuple_index)
+	{
+		throw OutOfRangeTupleAccess("Out of range tuple subscript for read operation");
+	}
+
+	if(input_[tuple_index].size() <= bit_index)
+	{
+		throw OutOfRangeBitAccess("Out of range bit subscript for read operation");
+	}
+
 	graph_node.value()->value = crypto_->copy(*input_[input_node.tuple_index][input_node.bit_index]);
 }
 
@@ -224,7 +238,21 @@ void TreeRunner::evaluate_output(const TreeRunner::graph_node_t& graph_node)
 	}
 
 	const auto& output_node = std::get<herd::common::OutputNode>(graph_node.value()->node);
-	output_[output_node.tuple_index][output_node.bit_index] = crypto_->copy(*graph_node.parents()[0].value()->value);
+
+	const auto tuple_index = output_node.tuple_index;
+	const auto bit_index = output_node.bit_index;
+
+	if(output_.size() <= tuple_index)
+	{
+		throw OutOfRangeTupleAccess("Out of range tuple subscript for write operation");
+	}
+
+	if(output_[tuple_index].size() <= bit_index)
+	{
+		throw OutOfRangeBitAccess("Out of range bit subscript for write operation");
+	}
+
+	output_[tuple_index][bit_index] = crypto_->copy(*graph_node.parents()[0].value()->value);
 }
 
 void TreeRunner::evaluate(const TreeRunner::graph_node_t& graph_node)

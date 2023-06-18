@@ -22,6 +22,10 @@ namespace crypto
 		CryptoVector load_n_from_stream(std::istream& stream, std::size_t count);
 		std::vector<CryptoVector> load_row_from_stream(std::istream& stream, const std::vector<unsigned int>& columns);
 
+		virtual void store_to_stream(std::ostream& stream, const CryptoValue& value) = 0;
+		void store_vector_to_stream(std::ostream& stream, const CryptoVector& crypto_vector);
+		void store_row_to_stream(std::ostream& stream, const std::vector<CryptoVector>& row);
+
 		virtual crypto_value_ptr_t ternary_op(herd::common::Operation operation, const CryptoValue& input_a, const CryptoValue& crypto_b, const CryptoValue& crypto_c) = 0;
 		virtual crypto_value_ptr_t binary_op(herd::common::Operation operation, const CryptoValue& input_a, const CryptoValue& crypto_b) = 0;
 		virtual crypto_value_ptr_t unary_op(herd::common::Operation operation, const CryptoValue& input) = 0;

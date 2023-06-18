@@ -1,5 +1,7 @@
 #include "crypto/binfhe/detail/crypto.hpp"
 
+#include "herd/common/model/exception.hpp"
+
 #include "crypto/binfhe/detail/crypto_value.hpp"
 #include "crypto/exception.hpp"
 
@@ -28,7 +30,22 @@ namespace crypto::binfhe::detail
 		}
 		catch (const cereal::Exception& exception)
 		{
-			throw CryptoStreamCorrupted(exception.what());
+			throw herd::common::IOReadError(exception.what());
+		}
+	}
+
+
+	void CryptoImpl::store_to_stream(std::ostream& stream, const CryptoValue& value)
+	{
+		try
+		{
+			const auto& in = dynamic_cast<const CryptoValueImpl&>(value);
+
+			lbcrypto::Serial::Serialize(in.value(), stream, lbcrypto::SerType::BINARY);
+		}
+		catch (const cereal::Exception& exception)
+		{
+			throw herd::common::IOWriteError(exception.what());
 		}
 	}
 
