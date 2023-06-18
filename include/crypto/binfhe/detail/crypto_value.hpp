@@ -16,8 +16,6 @@ namespace crypto::binfhe::detail
 		[[nodiscard]] lbcrypto::ConstLWECiphertext value();
 		[[nodiscard]] std::shared_ptr<const lbcrypto::LWECiphertextImpl> value() const;
 
-		void serialize(std::ostream& out_stream) const override;
-
 	private:
 		lbcrypto::ConstLWECiphertext ciphertext_;
 	};

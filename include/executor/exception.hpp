@@ -14,4 +14,14 @@ struct WrongArgumentsCount: public ExecutorException
 	using ExecutorException::ExecutorException;
 };
 
+struct OutOfRangeTupleAccess: public ExecutorException
+{
+	using ExecutorException::ExecutorException;
+};
+
+struct OutOfRangeBitAccess: public ExecutorException
+{
+	using ExecutorException::ExecutorException;
+};
+
 #endif //EXECUTOR_WORKER_EXECUTOR_EXCEPTION_HPP

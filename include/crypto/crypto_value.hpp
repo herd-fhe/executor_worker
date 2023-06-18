@@ -11,8 +11,6 @@ namespace crypto
 	{
 	public:
 		virtual ~CryptoValue() = default;
-
-		virtual void serialize(std::ostream& out_stream) const = 0;
 	};
 
 	using crypto_value_ptr_t = std::unique_ptr<CryptoValue>;

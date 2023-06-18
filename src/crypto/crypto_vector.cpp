@@ -18,6 +18,11 @@ namespace crypto
 		return values_[index];
 	}
 
+	std::size_t CryptoVector::size() const noexcept
+	{
+		return values_.size();
+	}
+
 	CryptoVector::const_iterator CryptoVector::begin() const noexcept
 	{
 		return values_.begin();

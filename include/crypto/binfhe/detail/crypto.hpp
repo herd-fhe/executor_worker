@@ -15,6 +15,7 @@ namespace crypto::binfhe::detail
 		explicit CryptoImpl(std::unique_ptr<IKeyset> keyset);
 
 		crypto_value_ptr_t load_from_stream(std::istream& stream) override;
+		void store_to_stream(std::ostream& stream, const CryptoValue& value) override;
 
 		crypto_value_ptr_t ternary_op(herd::common::Operation operation, const CryptoValue& input_a, const CryptoValue& input_b, const CryptoValue& input_c) override;
 		crypto_value_ptr_t binary_op(herd::common::Operation operation, const CryptoValue& input_a, const CryptoValue& input_b) override;

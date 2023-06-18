@@ -22,6 +22,8 @@ namespace crypto
 		crypto_value_ptr_t& operator[](std::size_t index);
 		const crypto_value_ptr_t& operator[](std::size_t index) const;
 
+		std::size_t size() const noexcept;
+
 		[[nodiscard]] const_iterator begin() const noexcept;
 		[[nodiscard]] const_iterator cbegin() const noexcept;
 

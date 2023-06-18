@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <fstream>
 
+#include "crypto/crypto.hpp"
 #include "crypto/crypto_vector.hpp"
 
 
@@ -15,7 +16,7 @@ namespace data
 	public:
 		DataFrameOutput(const std::filesystem::path& data_frame_path, const std::vector<unsigned int>& columns);
 
-		void write_row(std::vector<crypto::CryptoVector>&& row);
+		void write_row(const std::vector<crypto::CryptoVector>& row, crypto::Crypto& crypto);
 
 	private:
 		std::ofstream data_frame_stream_;
