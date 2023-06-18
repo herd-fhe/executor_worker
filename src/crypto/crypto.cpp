@@ -1,5 +1,7 @@
 #include "crypto/crypto.hpp"
 
+#include <sstream>
+
 #include "spdlog/spdlog.h"
 
 #include "herd/common/model/exception.hpp"

@@ -25,7 +25,9 @@ public:
 private:
 	using graph_node_t = decltype(RunnableCircuit::circuit_graph)::Node<false>;
 
-	bool closed_{false};
+	std::mutex exception_mutex_;
+	std::atomic_flag exception_present_;
+	std::exception_ptr exception_ = nullptr;
 
 	std::mutex execution_mutex_;
 
@@ -34,7 +36,9 @@ private:
 	std::mutex queue_mutex_;
 	std::condition_variable_any consumers_cv_;
 
-	std::unique_ptr<std::latch> completion_point_{};
+	std::mutex todo_mutex_;
+	std::condition_variable todo_cv_;
+	std::size_t todo_job_counter_;
 
 	std::vector<crypto::CryptoVector> input_;
 	std::vector<crypto::CryptoVector> output_;
@@ -44,6 +48,7 @@ private:
 	std::shared_ptr<crypto::Crypto> crypto_;
 
 	std::optional<graph_node_t> next_node(const std::stop_token& stop_token);
+	void handle_exception(std::exception_ptr exception) noexcept;
 	void mark_node_completed(graph_node_t node) noexcept;
 
 	void evaluate_constant(const TreeRunner::graph_node_t& graph_node);

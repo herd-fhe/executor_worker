@@ -29,13 +29,24 @@ TreeRunner::TreeRunner(std::size_t thread_count)
 				while(true)
 				{
 					auto node = next_node(stop_token);
-
 					if(!node.has_value())
 					{
 						return;
 					}
 
-					evaluate(node.value());
+					if(exception_present_.test())
+					{
+						continue;
+					}
+
+					try
+					{
+						evaluate(node.value());
+					}
+					catch (const ExecutorException& error)
+					{
+						TreeRunner::handle_exception(std::current_exception());
+					}
 
 					TreeRunner::mark_node_completed(node.value());
 				}
@@ -49,6 +60,11 @@ TreeRunner::~TreeRunner()
 	for(auto& worker: workers_)
 	{
 		worker.request_stop();
+	}
+
+	for(auto& worker: workers_)
+	{
+		worker.join();
 	}
 }
 
@@ -70,7 +86,7 @@ std::vector<crypto::CryptoVector> TreeRunner::execute(RunnableCircuit& circuit, 
 		output_.emplace_back(out_size);
 	}
 
-	completion_point_ = std::make_unique<std::latch>(circuit.circuit_graph.node_size());
+	todo_job_counter_ = circuit.circuit_graph.node_size();
 
 	{
 		std::unique_lock queue_lock(queue_mutex_);
@@ -82,7 +98,17 @@ std::vector<crypto::CryptoVector> TreeRunner::execute(RunnableCircuit& circuit, 
 	}
 	consumers_cv_.notify_all();
 
-	completion_point_->wait();
+	{
+		std::unique_lock todo_lock(todo_mutex_);
+		todo_cv_.wait(todo_lock, [this](){
+			return todo_job_counter_ == 0;
+		});
+	}
+
+	if(exception_)
+	{
+		std::rethrow_exception(exception_);
+	}
 
 	return std::move(output_);
 }
@@ -146,7 +172,23 @@ void TreeRunner::mark_node_completed(TreeRunner::graph_node_t node) noexcept
 
 	//todo: maybe wake only added number of tasks??
 	consumers_cv_.notify_all();
-	completion_point_->count_down();
+
+	bool should_notify = false;
+	{
+		std::unique_lock todo_lock(todo_mutex_);
+		if(!exception_present_.test())
+		{
+			--todo_job_counter_;
+			if(todo_job_counter_ == 0)
+			{
+				should_notify = true;
+			}
+		}
+	}
+	if(should_notify)
+	{
+		todo_cv_.notify_all();
+	}
 }
 
 void TreeRunner::evaluate_constant(const TreeRunner::graph_node_t& graph_node)
@@ -282,5 +324,21 @@ void TreeRunner::evaluate(const TreeRunner::graph_node_t& graph_node)
 	else
 	{
 		assert(false && "Not supported node type");
+	}
+}
+
+void TreeRunner::handle_exception(std::exception_ptr exception) noexcept
+{
+	std::unique_lock lock(exception_mutex_);
+
+	if(!exception_)
+	{
+		{
+			std::unique_lock todo_lock(todo_mutex_);
+			exception_present_.test_and_set();
+			exception_ = std::move(exception);
+			todo_job_counter_ = 0;
+		}
+		todo_cv_.notify_all();
 	}
 }
