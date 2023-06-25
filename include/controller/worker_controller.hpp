@@ -11,7 +11,7 @@ class WorkerController: public herd::proto::Worker::Service
 public:
 	WorkerController(Config config);
 
-	grpc::Status run(::grpc::ServerContext* context, const ::herd::proto::Task* request, ::herd::proto::Empty* response) override;
+	grpc::Status map(::grpc::ServerContext* context, const ::herd::proto::MapTask* request, ::herd::proto::Empty* response) override;
 
 private:
 	Config config_;

@@ -17,13 +17,12 @@ WorkerController::WorkerController(Config config)
 {
 }
 
-grpc::Status WorkerController::run([[maybe_unused]] ::grpc::ServerContext* context, const ::herd::proto::Task* request, [[maybe_unused]] ::herd::proto::Empty* response)
+grpc::Status WorkerController::map([[maybe_unused]] ::grpc::ServerContext* context, const ::herd::proto::MapTask* request, [[maybe_unused]] ::herd::proto::Empty* response)
 {
 	herd::common::CryptoKeyPtr crypto_key_ptr{};
-	herd::common::DataFramePtr input_data_frame_ptr{};
+	herd::common::InputDataFramePtr input_data_frame_ptr{};
 	herd::common::DataFramePtr output_data_frame_ptr{};
 	herd::common::UUID session_uuid{};
-	uint64_t row_count = 0;
 	RunnableCircuit circuit{};
 
 	try
@@ -32,7 +31,6 @@ grpc::Status WorkerController::run([[maybe_unused]] ::grpc::ServerContext* conte
 		input_data_frame_ptr = herd::mapper::to_model(request->input_data_frame_ptr());
 		output_data_frame_ptr = herd::mapper::to_model(request->output_data_frame_ptr());
 		session_uuid = herd::common::UUID(request->session_uuid());
-		row_count = request->row_count();
 		circuit = mapper::to_model(request->circuit());
 	}
 	catch(const std::runtime_error& error)
@@ -61,11 +59,10 @@ grpc::Status WorkerController::run([[maybe_unused]] ::grpc::ServerContext* conte
 	auto executor = Executor();
 	executor.set_crypto(std::move(crypto));
 
-	executor.set_input(std::move(input_data_frame));
+	executor.add_input(std::move(input_data_frame));
 	executor.set_output(std::move(output_data_frame));
 
 	executor.set_circuit(std::move(circuit));
-	executor.set_row_count(row_count);
 
 	try
 	{

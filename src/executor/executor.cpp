@@ -7,9 +7,9 @@ Executor::Executor(std::size_t worker_count)
 {
 }
 
-void Executor::set_input(std::unique_ptr<data::DataFrameInput> input) noexcept
+void Executor::add_input(std::unique_ptr<data::DataFrameInput> input) noexcept
 {
-	input_ = std::move(input);
+	inputs_.emplace_back(std::move(input));
 }
 
 void Executor::set_output(std::unique_ptr<data::DataFrameOutput> output) noexcept
@@ -28,27 +28,20 @@ void Executor::set_circuit(RunnableCircuit circuit) noexcept
 	circuit_ = std::move(circuit);
 }
 
-void Executor::set_row_count(uint64_t row_count)
-{
-	row_count_ = row_count;
-}
-
 void Executor::run()
 {
 	spdlog::info("Executor started");
-	for(std::size_t i = 0; i < row_count_; ++i)
+	for(auto& input: inputs_)
 	{
-		spdlog::info("Processing row: {}...", i);
-		process_row();
-		spdlog::info("Row: {} processed", i);
+		for(uint64_t i = 0; i < input->row_count(); ++i)
+		{
+			spdlog::info("Processing row: {}...", std::to_string(i));
+			auto row = input->read_row(*crypto_);
+			auto output_row = tree_runner_.execute(circuit_, std::move(row));
+			circuit_.reset_circuit();
+			output_->write_row(output_row, *crypto_);
+			spdlog::info("Row: {} processed", i);
+		}
 	}
 	spdlog::info("Executor finished");
-}
-
-void Executor::process_row()
-{
-	auto row = input_->read_row(*crypto_);
-	auto output_row = tree_runner_.execute(circuit_, std::move(row));
-	circuit_.reset_circuit();
-	output_->write_row(output_row, *crypto_);
 }

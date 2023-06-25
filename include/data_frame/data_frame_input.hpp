@@ -14,13 +14,15 @@ namespace data
 	class DataFrameInput
 	{
 	public:
-		DataFrameInput(const std::filesystem::path& data_frame_path, const std::vector<unsigned int>& columns);
+		DataFrameInput(const std::filesystem::path& data_frame_path, const std::vector<unsigned int>& columns, uint64_t row_count);
 
 		std::vector<crypto::CryptoVector> read_row(crypto::Crypto& crypto);
-
+		uint64_t row_count() const noexcept;
 	private:
 		std::ifstream data_frame_stream_;
 		std::vector<unsigned int> columns_;
+
+		uint64_t row_count_;
 	};
 }
 

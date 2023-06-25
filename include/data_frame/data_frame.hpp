@@ -13,7 +13,7 @@
 
 namespace data
 {
-	std::unique_ptr<DataFrameInput> load_input(const herd::common::DataFramePtr& ptr, const std::vector<unsigned int>& columns, const herd::common::UUID& session_uuid, const std::filesystem::path& storage_base_dir);
+	std::unique_ptr<DataFrameInput> load_input(const herd::common::InputDataFramePtr& ptr, const std::vector<unsigned int>& columns, const herd::common::UUID& session_uuid, const std::filesystem::path& storage_base_dir);
 	std::unique_ptr<DataFrameOutput> load_output(const herd::common::DataFramePtr& ptr, const std::vector<unsigned int>& columns, const herd::common::UUID& session_uuid, const std::filesystem::path& storage_base_dir);
 }
 

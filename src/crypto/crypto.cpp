@@ -39,8 +39,8 @@ namespace crypto
 		const auto read_bytes = stream.tellg() - pos;
 		if (read_bytes != row_size)
 		{
-			spdlog::error("Crypto stream corrupted - wrong row size");
-			throw CryptoStreamCorrupted("Crypto stream corrupted - wrong row size");
+			spdlog::error("Crypto stream corrupted - wrong row row_count");
+			throw CryptoStreamCorrupted("Crypto stream corrupted - wrong row row_count");
 		}
 
 		return vectors;

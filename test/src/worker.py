@@ -4,7 +4,7 @@ import subprocess
 import os
 
 from generated.worker_pb2_grpc import WorkerStub
-from generated.worker_pb2 import Task
+from generated.worker_pb2 import MapTask
 
 
 tools_dir = os.environ.get("TEST_HOME")
@@ -50,21 +50,21 @@ def decrypt_data(temp_dir, session, output_data_frame, row_size, row_count):
     return result.stdout.decode().split("\n")[:-1]
 
 
-def send_task(stub: WorkerStub, task: Task, copy_frame=True, copy_key=True):
+def single_frame_map_task(stub: WorkerStub, task: MapTask, copy_frame=True, copy_key=True):
     with tempfile.TemporaryDirectory() as tmp_dir_name:
         input_size = sum(task.circuit.input)
         output_size = sum(task.circuit.output)
-        row_count = task.row_count
+        row_count = task.input_data_frame_ptr.row_count
 
         setup_resources(tmp_dir_name,
                         task.session_uuid,
-                        task.input_data_frame_ptr.data_frame_uuid, task.output_data_frame_ptr.data_frame_uuid,
-                        task.input_data_frame_ptr.block_id,
+                        task.input_data_frame_ptr.pointer.data_frame_uuid, task.output_data_frame_ptr.data_frame_uuid,
+                        task.input_data_frame_ptr.pointer.block_id,
                         1, #only BINFHE support
                         input_size,
                         copy_frame, copy_key)
 
-        stub.run(task)
+        stub.map(task)
 
         output_data_frame_name = os.path.join(
             task.output_data_frame_ptr.data_frame_uuid,

@@ -3,13 +3,13 @@ import os
 import pytest
 import grpc
 
-from generated.worker_pb2 import Task, DataFramePtr, CryptoKeyPtr
+from generated.worker_pb2 import MapTask, DataFramePtr, CryptoKeyPtr, InputDataFramePtr
 from generated.worker_pb2_grpc import WorkerStub
 from generated.circuit_pb2 import Circuit
 from generated.node_pb2 import InputNode, OutputNode, Node, OperationNode, NOT, ConstantNode
 from generated.common_pb2 import Edge, BINFHE
 
-from worker import send_task
+from worker import single_frame_map_task
 
 
 @pytest.fixture()
@@ -24,17 +24,19 @@ def stub():
 
 
 def test_wrong_out_bit(stub):
-    task = Task(
+    task = MapTask(
         session_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
-        input_data_frame_ptr=DataFramePtr(
-            data_frame_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
-            block_id=3
+        input_data_frame_ptr=InputDataFramePtr(
+            pointer=DataFramePtr(
+                data_frame_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
+                block_id=3
+            ),
+            row_count=4
         ),
         output_data_frame_ptr=DataFramePtr(
             data_frame_uuid="f5a1afbc-7090-483b-8602-eaca0d5c7620",
             block_id=3
         ),
-        row_count=4,
         crypto_key_ptr=CryptoKeyPtr(
             schema_type=BINFHE
         ),
@@ -73,23 +75,25 @@ def test_wrong_out_bit(stub):
     )
 
     with pytest.raises(grpc.RpcError) as e_info:
-        send_task(stub, task)
+        single_frame_map_task(stub, task)
 
     assert e_info.value.code() == grpc.StatusCode.INTERNAL
 
 
 def test_wrong_out_tuple(stub):
-    task = Task(
+    task = MapTask(
         session_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
-        input_data_frame_ptr=DataFramePtr(
-            data_frame_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
-            block_id=3
+        input_data_frame_ptr=InputDataFramePtr(
+            pointer=DataFramePtr(
+                data_frame_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
+                block_id=3
+            ),
+            row_count=4,
         ),
         output_data_frame_ptr=DataFramePtr(
             data_frame_uuid="f5a1afbc-7090-483b-8602-eaca0d5c7620",
             block_id=3
         ),
-        row_count=4,
         crypto_key_ptr=CryptoKeyPtr(
             schema_type=BINFHE
         ),
@@ -128,23 +132,25 @@ def test_wrong_out_tuple(stub):
     )
 
     with pytest.raises(grpc.RpcError) as e_info:
-        send_task(stub, task)
+        single_frame_map_task(stub, task)
 
     assert e_info.value.code() == grpc.StatusCode.INTERNAL
 
 
 def test_wrong_in_tuple(stub):
-    task = Task(
+    task = MapTask(
         session_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
-        input_data_frame_ptr=DataFramePtr(
-            data_frame_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
-            block_id=0
+        input_data_frame_ptr=InputDataFramePtr(
+            pointer=DataFramePtr(
+                data_frame_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
+                block_id=0
+            ),
+            row_count=16,
         ),
         output_data_frame_ptr=DataFramePtr(
             data_frame_uuid="f5a1afbc-7090-483b-8602-eaca0d5c7620",
             block_id=0
         ),
-        row_count=16,
         crypto_key_ptr=CryptoKeyPtr(
             schema_type=BINFHE
         ),
@@ -183,23 +189,25 @@ def test_wrong_in_tuple(stub):
     )
 
     with pytest.raises(grpc.RpcError) as e_info:
-        send_task(stub, task)
+        single_frame_map_task(stub, task)
 
     assert e_info.value.code() == grpc.StatusCode.INTERNAL
 
 
 def test_wrong_in_bit(stub):
-    task = Task(
+    task = MapTask(
         session_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
-        input_data_frame_ptr=DataFramePtr(
-            data_frame_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
-            block_id=0
+        input_data_frame_ptr=InputDataFramePtr(
+            pointer=DataFramePtr(
+                data_frame_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
+                block_id=0
+            ),
+            row_count=16,
         ),
         output_data_frame_ptr=DataFramePtr(
             data_frame_uuid="f5a1afbc-7090-483b-8602-eaca0d5c7620",
             block_id=0
         ),
-        row_count=16,
         crypto_key_ptr=CryptoKeyPtr(
             schema_type=BINFHE
         ),
@@ -238,6 +246,6 @@ def test_wrong_in_bit(stub):
     )
 
     with pytest.raises(grpc.RpcError) as e_info:
-        send_task(stub, task)
+        single_frame_map_task(stub, task)
 
     assert e_info.value.code() == grpc.StatusCode.INTERNAL
