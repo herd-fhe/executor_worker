@@ -15,6 +15,10 @@ struct RunnableNode
 	unsigned int completed_children = 0;
 
 	crypto::crypto_value_ptr_t value;
+
+	RunnableNode(herd::common::node_t node, unsigned int parent_count, unsigned int child_count)
+	:	node(std::move(node)), parent_count(parent_count), child_count(child_count)
+	{};
 };
 
 using runnable_node_ptr_t = std::shared_ptr<RunnableNode>;

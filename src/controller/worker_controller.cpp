@@ -55,8 +55,11 @@ grpc::Status WorkerController::map([[maybe_unused]] ::grpc::ServerContext* conte
 		return {grpc::FAILED_PRECONDITION, error.what()};
 	}
 
+	spdlog::info("Input data frame: {}:{}", input_data_frame_ptr.pointer.uuid.as_string(), input_data_frame_ptr.pointer.partition);
+	spdlog::info("Output data frame: {}:{}", output_data_frame_ptr.uuid.as_string(), output_data_frame_ptr.partition);
+	spdlog::info("Loaded task requirements (input data frame, cloud key)");
 
-	auto executor = Executor();
+	auto executor = Executor(1);
 	executor.set_crypto(std::move(crypto));
 
 	executor.add_input(std::move(input_data_frame));
