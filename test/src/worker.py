@@ -59,7 +59,7 @@ def single_frame_map_task(stub: WorkerStub, task: MapTask, copy_frame=True, copy
         setup_resources(tmp_dir_name,
                         task.session_uuid,
                         task.input_data_frame_ptr.pointer.data_frame_uuid, task.output_data_frame_ptr.data_frame_uuid,
-                        task.input_data_frame_ptr.pointer.block_id,
+                        task.input_data_frame_ptr.pointer.partition,
                         1, #only BINFHE support
                         input_size,
                         copy_frame, copy_key)
@@ -68,6 +68,6 @@ def single_frame_map_task(stub: WorkerStub, task: MapTask, copy_frame=True, copy
 
         output_data_frame_name = os.path.join(
             task.output_data_frame_ptr.data_frame_uuid,
-            str(task.output_data_frame_ptr.block_id))
+            str(task.output_data_frame_ptr.partition))
 
         return decrypt_data(tmp_dir_name, task.session_uuid, output_data_frame_name, output_size, row_count)

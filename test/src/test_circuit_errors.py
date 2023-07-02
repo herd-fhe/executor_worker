@@ -29,13 +29,13 @@ def test_wrong_out_bit(stub):
         input_data_frame_ptr=InputDataFramePtr(
             pointer=DataFramePtr(
                 data_frame_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
-                block_id=3
+                partition=3
             ),
             row_count=4
         ),
         output_data_frame_ptr=DataFramePtr(
             data_frame_uuid="f5a1afbc-7090-483b-8602-eaca0d5c7620",
-            block_id=3
+            partition=3
         ),
         crypto_key_ptr=CryptoKeyPtr(
             schema_type=BINFHE
@@ -86,13 +86,13 @@ def test_wrong_out_tuple(stub):
         input_data_frame_ptr=InputDataFramePtr(
             pointer=DataFramePtr(
                 data_frame_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
-                block_id=3
+                partition=3
             ),
             row_count=4,
         ),
         output_data_frame_ptr=DataFramePtr(
             data_frame_uuid="f5a1afbc-7090-483b-8602-eaca0d5c7620",
-            block_id=3
+            partition=3
         ),
         crypto_key_ptr=CryptoKeyPtr(
             schema_type=BINFHE
@@ -143,13 +143,13 @@ def test_wrong_in_tuple(stub):
         input_data_frame_ptr=InputDataFramePtr(
             pointer=DataFramePtr(
                 data_frame_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
-                block_id=0
+                partition=0
             ),
             row_count=16,
         ),
         output_data_frame_ptr=DataFramePtr(
             data_frame_uuid="f5a1afbc-7090-483b-8602-eaca0d5c7620",
-            block_id=0
+            partition=0
         ),
         crypto_key_ptr=CryptoKeyPtr(
             schema_type=BINFHE
@@ -200,13 +200,13 @@ def test_wrong_in_bit(stub):
         input_data_frame_ptr=InputDataFramePtr(
             pointer=DataFramePtr(
                 data_frame_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
-                block_id=0
+                partition=0
             ),
             row_count=16,
         ),
         output_data_frame_ptr=DataFramePtr(
             data_frame_uuid="f5a1afbc-7090-483b-8602-eaca0d5c7620",
-            block_id=0
+            partition=0
         ),
         crypto_key_ptr=CryptoKeyPtr(
             schema_type=BINFHE

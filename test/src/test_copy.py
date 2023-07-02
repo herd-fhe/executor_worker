@@ -29,13 +29,13 @@ def test_copy_8(stub):
         input_data_frame_ptr=InputDataFramePtr(
             pointer=DataFramePtr(
                 data_frame_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
-                block_id=0
+                partition=0
             ),
             row_count=16,
         ),
         output_data_frame_ptr=DataFramePtr(
             data_frame_uuid="f5a1afbc-7090-483b-8602-eaca0d5c7620",
-            block_id=0
+            partition=0
         ),
         crypto_key_ptr=CryptoKeyPtr(
             schema_type=BINFHE
@@ -101,13 +101,13 @@ def test_copy_16(stub):
         input_data_frame_ptr=InputDataFramePtr(
             pointer=DataFramePtr(
                 data_frame_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
-                block_id=1
+                partition=1
             ),
             row_count=32,
         ),
         output_data_frame_ptr=DataFramePtr(
             data_frame_uuid="f5a1afbc-7090-483b-8602-eaca0d5c7620",
-            block_id=1
+            partition=1
         ),
         crypto_key_ptr=CryptoKeyPtr(
             schema_type=BINFHE
@@ -189,13 +189,13 @@ def test_copy_2_8(stub):
         input_data_frame_ptr=InputDataFramePtr(
             pointer=DataFramePtr(
                 data_frame_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
-                block_id=2
+                partition=2
             ),
             row_count=32,
         ),
         output_data_frame_ptr=DataFramePtr(
             data_frame_uuid="f5a1afbc-7090-483b-8602-eaca0d5c7620",
-            block_id=2
+            partition=2
         ),
         crypto_key_ptr=CryptoKeyPtr(
             schema_type=BINFHE
