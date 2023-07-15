@@ -5,11 +5,25 @@ import os
 
 from generated.worker_pb2_grpc import WorkerStub
 from generated.worker_pb2 import MapTask
+from generated.common_pb2 import *
 
 
 tools_dir = os.environ.get("TEST_HOME")
 storage_dir = os.environ.get("STORAGE_BASE_DIR")
 key_dir = os.environ.get("KEY_BASE_DIR")
+
+
+def map_data_type_to_width(data_type: DataType):
+    if data_type == UINT8 or data_type == INT8:
+        return 8
+    elif data_type == UINT16 or data_type == INT16:
+        return 16
+    elif data_type == UINT32 or data_type == INT32:
+        return 32
+    elif data_type == UINT64 or data_type == INT64:
+        return 64
+
+    assert False
 
 
 def setup_resources(temp_dir,
@@ -52,8 +66,8 @@ def decrypt_data(temp_dir, session, output_data_frame, row_size, row_count):
 
 def single_frame_map_task(stub: WorkerStub, task: MapTask, copy_frame=True, copy_key=True):
     with tempfile.TemporaryDirectory() as tmp_dir_name:
-        input_size = sum(task.circuit.input)
-        output_size = sum(task.circuit.output)
+        input_size = sum([map_data_type_to_width(column) for column in task.circuit.input])
+        output_size = sum([map_data_type_to_width(column.data_type) for column in task.circuit.output])
         row_count = task.input_data_frame_ptr.row_count
 
         setup_resources(tmp_dir_name,

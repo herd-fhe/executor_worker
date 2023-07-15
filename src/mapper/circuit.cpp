@@ -1,6 +1,9 @@
 #include "mapper/circuit.hpp"
 
 #include "herd/mapper/executor.hpp"
+#include "herd/mapper/storage.hpp"
+
+#include "herd/common/native_type_mapping.hpp"
 
 
 namespace mapper
@@ -9,8 +12,19 @@ namespace mapper
 	{
 		RunnableCircuit circuit{};
 
-		circuit.input.insert(std::end(circuit.input), std::begin(circuit_proto.input()), std::end(circuit_proto.input()));
-		circuit.output.insert(std::end(circuit.output), std::begin(circuit_proto.output()), std::end(circuit_proto.output()));
+		circuit.input.reserve(static_cast<unsigned long>(circuit_proto.input().size()));
+		for(int i = 0; i < circuit_proto.input().size(); ++i)
+		{
+			const auto data_type = herd::mapper::to_model(circuit_proto.input(i));
+			circuit.input.emplace_back(herd::common::data_type_to_bit_width(data_type));
+		}
+
+		circuit.output.reserve(static_cast<unsigned long>(circuit_proto.output().size()));
+		for(int i = 0; i < circuit_proto.output().size(); ++i)
+		{
+			const auto data_type = herd::mapper::to_model(circuit_proto.output(i).data_type());
+			circuit.output.emplace_back(herd::common::data_type_to_bit_width(data_type));
+		}
 
 		auto& graph = circuit.circuit_graph;
 
