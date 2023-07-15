@@ -5,9 +5,9 @@ import grpc
 
 from generated.worker_pb2 import MapTask, DataFramePtr, CryptoKeyPtr, InputDataFramePtr
 from generated.worker_pb2_grpc import WorkerStub
-from generated.circuit_pb2 import Circuit
+from generated.circuit_pb2 import Circuit, OutputColumn
 from generated.node_pb2 import InputNode, OutputNode, Node, OperationNode, NOT, ConstantNode
-from generated.common_pb2 import Edge, BINFHE
+from generated.common_pb2 import *
 
 from worker import single_frame_map_task
 
@@ -41,8 +41,15 @@ def test_invalid_frame_ptr(stub):
             schema_type=BINFHE
         ),
         circuit=Circuit(
-            input=[8],
-            output=[8],
+            input=[
+                INT8
+            ],
+            output=[
+                OutputColumn(
+                    data_type=UINT8,
+                    name="test"
+                )
+            ],
             nodes=[
                 Node(constant=ConstantNode(value=True)),
                 Node(constant=ConstantNode(value=False)),
@@ -98,8 +105,15 @@ def test_invalid_key_ptr(stub):
             schema_type=BINFHE
         ),
         circuit=Circuit(
-            input=[8],
-            output=[8],
+            input=[
+                INT8
+            ],
+            output=[
+                OutputColumn(
+                    data_type=UINT8,
+                    name="test"
+                )
+            ],
             nodes=[
                 Node(constant=ConstantNode(value=True)),
                 Node(constant=ConstantNode(value=False)),
