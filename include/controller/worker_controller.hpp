@@ -9,9 +9,10 @@
 class WorkerController: public herd::proto::Worker::Service
 {
 public:
-	WorkerController(Config config);
+	explicit WorkerController(Config config);
 
-	grpc::Status map(::grpc::ServerContext* context, const ::herd::proto::MapTask* request, ::herd::proto::Empty* response) override;
+	grpc::Status map(grpc::ServerContext* context, const herd::proto::MapTask* request, herd::proto::Empty* response) override;
+	grpc::Status reduce(grpc::ServerContext* context, const herd::proto::ReduceTask* request, herd::proto::Empty* response) override;
 
 private:
 	Config config_;

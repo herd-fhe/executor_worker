@@ -21,7 +21,8 @@ public:
 
 	void set_circuit(RunnableCircuit circuit) noexcept;
 
-	void run();
+	void map();
+	void reduce();
 
 private:
 	std::shared_ptr<crypto::Crypto> crypto_;

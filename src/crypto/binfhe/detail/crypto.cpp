@@ -49,6 +49,11 @@ namespace crypto::binfhe::detail
 		}
 	}
 
+	crypto_value_ptr_t CryptoImpl::create_empty_value()
+	{
+		return constant(false);
+	}
+
 	CryptoImpl::CryptoImpl(std::unique_ptr<IKeyset> keyset)
 	: 	keyset_holder_(std::move(keyset)), keyset_(validate_keyset(keyset_holder_))
 	{

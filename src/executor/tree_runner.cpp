@@ -74,7 +74,7 @@ void TreeRunner::set_crypto(std::shared_ptr<crypto::Crypto> crypto) noexcept
 	crypto_ = std::move(crypto);
 }
 
-std::vector<crypto::CryptoVector> TreeRunner::execute(RunnableCircuit& circuit, std::vector<crypto::CryptoVector>&& input)
+std::vector<crypto::CryptoVector> TreeRunner::execute(RunnableCircuit& circuit, std::vector<std::vector<crypto::CryptoVector>>&& input)
 {
 	std::unique_lock lock(execution_mutex_);
 	assert(crypto_);
@@ -212,6 +212,7 @@ void TreeRunner::evaluate_input(const TreeRunner::graph_node_t& graph_node)
 	const auto& input_node = std::get<herd::common::InputNode>(graph_node.value()->node);
 
 	const auto tuple_index = input_node.tuple_index;
+	const auto field_index = input_node.field_index;
 	const auto bit_index = input_node.bit_index;
 
 	if(input_.size() <= tuple_index)
@@ -219,12 +220,17 @@ void TreeRunner::evaluate_input(const TreeRunner::graph_node_t& graph_node)
 		throw OutOfRangeTupleAccess("Out of range tuple subscript for read operation");
 	}
 
-	if(input_[tuple_index].size() <= bit_index)
+	if(input_[tuple_index].size() <= field_index)
+	{
+		throw OutOfRangeTupleAccess("Out of range field subscript for read operation");
+	}
+
+	if(input_[tuple_index][field_index].size() <= bit_index)
 	{
 		throw OutOfRangeBitAccess("Out of range bit subscript for read operation");
 	}
 
-	graph_node.value()->value = crypto_->copy(*input_[input_node.tuple_index][input_node.bit_index]);
+	graph_node.value()->value = crypto_->copy(*input_[input_node.tuple_index][input_node.field_index][input_node.bit_index]);
 }
 
 void TreeRunner::evaluate_operation(const TreeRunner::graph_node_t& graph_node)
@@ -281,7 +287,7 @@ void TreeRunner::evaluate_output(const TreeRunner::graph_node_t& graph_node)
 
 	const auto& output_node = std::get<herd::common::OutputNode>(graph_node.value()->node);
 
-	const auto tuple_index = output_node.tuple_index;
+	const auto tuple_index = output_node.field_index;
 	const auto bit_index = output_node.bit_index;
 
 	if(output_.size() <= tuple_index)
