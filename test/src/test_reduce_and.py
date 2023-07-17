@@ -3,13 +3,13 @@ import os
 import pytest
 import grpc
 
-from generated.worker_pb2 import MapTask, DataFramePtr, CryptoKeyPtr, InputDataFramePtr
+from generated.worker_pb2 import DataFramePtr, CryptoKeyPtr, InputDataFramePtr, ReduceTask
 from generated.worker_pb2_grpc import WorkerStub
 from generated.circuit_pb2 import Circuit, OutputColumn, InputStructure
-from generated.node_pb2 import InputNode, OutputNode, Node, OperationNode, ConstantNode, AND
+from generated.node_pb2 import InputNode, OutputNode, Node, OperationNode, OR, AND
 from generated.common_pb2 import *
 
-from worker import single_frame_map_task
+from worker import single_frame_reduce_task
 
 
 @pytest.fixture()
@@ -23,25 +23,32 @@ def stub():
     channel.close()
 
 
-def test_and(stub):
-    task = MapTask(
+def test_reduce_and(stub):
+    task = ReduceTask(
         session_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
-        input_data_frame_ptr=InputDataFramePtr(
-            pointer=DataFramePtr(
-                data_frame_uuid="2ebb8249-1249-4d19-86f8-07ffa5c258cc",
-                partition=3
-            ),
-            row_count=16,
-        ),
+        input_data_frame_ptrs=[
+            InputDataFramePtr(
+                pointer=DataFramePtr(
+                    data_frame_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
+                    partition=3
+                ),
+                row_count=16,
+            )
+        ],
         output_data_frame_ptr=DataFramePtr(
-            data_frame_uuid="f5a1afbc-7190-483b-8602-eaca0d5cf620",
-            partition=3
+            data_frame_uuid="f5a1afbc-7090-483b-8602-eaca0d5cf620",
+            partition=0
         ),
         crypto_key_ptr=CryptoKeyPtr(
             schema_type=BINFHE
         ),
         circuit=Circuit(
             inputs=[
+                InputStructure(
+                    fields=[
+                        UINT8
+                    ]
+                ),
                 InputStructure(
                     fields=[
                         UINT8
@@ -55,8 +62,6 @@ def test_and(stub):
                 )
             ],
             nodes=[
-                Node(constant=ConstantNode(value=True)),
-                Node(constant=ConstantNode(value=False)),
                 Node(input=InputNode(tuple_index=0, field_index=0, bit_index=0)),
                 Node(input=InputNode(tuple_index=0, field_index=0, bit_index=1)),
                 Node(input=InputNode(tuple_index=0, field_index=0, bit_index=2)),
@@ -65,6 +70,14 @@ def test_and(stub):
                 Node(input=InputNode(tuple_index=0, field_index=0, bit_index=5)),
                 Node(input=InputNode(tuple_index=0, field_index=0, bit_index=6)),
                 Node(input=InputNode(tuple_index=0, field_index=0, bit_index=7)),
+                Node(input=InputNode(tuple_index=1, field_index=0, bit_index=0)),
+                Node(input=InputNode(tuple_index=1, field_index=0, bit_index=1)),
+                Node(input=InputNode(tuple_index=1, field_index=0, bit_index=2)),
+                Node(input=InputNode(tuple_index=1, field_index=0, bit_index=3)),
+                Node(input=InputNode(tuple_index=1, field_index=0, bit_index=4)),
+                Node(input=InputNode(tuple_index=1, field_index=0, bit_index=5)),
+                Node(input=InputNode(tuple_index=1, field_index=0, bit_index=6)),
+                Node(input=InputNode(tuple_index=1, field_index=0, bit_index=7)),
                 Node(operation=OperationNode(type=AND)),
                 Node(operation=OperationNode(type=AND)),
                 Node(operation=OperationNode(type=AND)),
@@ -83,22 +96,16 @@ def test_and(stub):
                 Node(output=OutputNode(field_index=0, bit_index=7))
             ],
             edges=[
-                Edge(start=2, end=10),
-                Edge(start=3, end=11),
-                Edge(start=4, end=12),
-                Edge(start=5, end=13),
-                Edge(start=6, end=14),
-                Edge(start=7, end=15),
+                Edge(start=0, end=16),
+                Edge(start=1, end=17),
+                Edge(start=2, end=18),
+                Edge(start=3, end=19),
+                Edge(start=4, end=20),
+                Edge(start=5, end=21),
+                Edge(start=6, end=22),
+                Edge(start=7, end=23),
                 Edge(start=8, end=16),
                 Edge(start=9, end=17),
-                Edge(start=0, end=10),
-                Edge(start=0, end=11),
-                Edge(start=0, end=12),
-                Edge(start=0, end=13),
-                Edge(start=1, end=14),
-                Edge(start=1, end=15),
-                Edge(start=1, end=16),
-                Edge(start=1, end=17),
                 Edge(start=10, end=18),
                 Edge(start=11, end=19),
                 Edge(start=12, end=20),
@@ -107,26 +114,17 @@ def test_and(stub):
                 Edge(start=15, end=23),
                 Edge(start=16, end=24),
                 Edge(start=17, end=25),
+                Edge(start=18, end=26),
+                Edge(start=19, end=27),
+                Edge(start=20, end=28),
+                Edge(start=21, end=29),
+                Edge(start=22, end=30),
+                Edge(start=23, end=31),
             ]
         )
     )
 
-    result = single_frame_map_task(stub, task)
+    result = single_frame_reduce_task(stub, task)
     assert [
-               '11110000',
-               '01110000',
-               '00110000',
-               '00010000',
                '00000000',
-               '00000000',
-               '00000000',
-               '00000000',
-               '00000000',
-               '10000000',
-               '11000000',
-               '11100000',
-               '11110000',
-               '11110000',
-               '11110000',
-               '11110000'
            ] == result

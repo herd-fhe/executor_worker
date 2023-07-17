@@ -12,11 +12,15 @@ namespace mapper
 	{
 		RunnableCircuit circuit{};
 
-		circuit.input.reserve(static_cast<unsigned long>(circuit_proto.input().size()));
-		for(int i = 0; i < circuit_proto.input().size(); ++i)
+		circuit.inputs.resize(static_cast<unsigned long>(circuit_proto.inputs().size()));
+		for(int i = 0; i < circuit_proto.inputs().size(); ++i)
 		{
-			const auto data_type = herd::mapper::to_model(circuit_proto.input(i));
-			circuit.input.emplace_back(herd::common::data_type_to_bit_width(data_type));
+			circuit.inputs[static_cast<std::size_t>(i)].reserve(static_cast<std::size_t>(circuit_proto.inputs(i).fields().size()));
+			for(int j = 0; j < circuit_proto.inputs(i).fields().size(); ++j)
+			{
+				const auto data_type = herd::mapper::to_model(circuit_proto.inputs(i).fields(j));
+				circuit.inputs[static_cast<std::size_t>(i)].emplace_back(herd::common::data_type_to_bit_width(data_type));
+			}
 		}
 
 		circuit.output.reserve(static_cast<unsigned long>(circuit_proto.output().size()));

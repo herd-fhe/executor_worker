@@ -5,8 +5,8 @@ import grpc
 
 from generated.worker_pb2 import MapTask, DataFramePtr, CryptoKeyPtr, InputDataFramePtr
 from generated.worker_pb2_grpc import WorkerStub
-from generated.circuit_pb2 import Circuit, OutputColumn
-from generated.node_pb2 import InputNode, OutputNode, Node, OperationNode, NOT, ConstantNode, OR
+from generated.circuit_pb2 import Circuit, OutputColumn, InputStructure
+from generated.node_pb2 import InputNode, OutputNode, Node, OperationNode, ConstantNode, OR
 from generated.common_pb2 import *
 
 from worker import single_frame_map_task
@@ -41,8 +41,12 @@ def test_or(stub):
             schema_type=BINFHE
         ),
         circuit=Circuit(
-            input=[
-                UINT8
+            inputs=[
+                InputStructure(
+                    fields=[
+                        UINT8
+                    ]
+                )
             ],
             output=[
                 OutputColumn(
@@ -53,14 +57,14 @@ def test_or(stub):
             nodes=[
                 Node(constant=ConstantNode(value=True)),
                 Node(constant=ConstantNode(value=False)),
-                Node(input=InputNode(tuple_index=0, bit_index=0)),
-                Node(input=InputNode(tuple_index=0, bit_index=1)),
-                Node(input=InputNode(tuple_index=0, bit_index=2)),
-                Node(input=InputNode(tuple_index=0, bit_index=3)),
-                Node(input=InputNode(tuple_index=0, bit_index=4)),
-                Node(input=InputNode(tuple_index=0, bit_index=5)),
-                Node(input=InputNode(tuple_index=0, bit_index=6)),
-                Node(input=InputNode(tuple_index=0, bit_index=7)),
+                Node(input=InputNode(tuple_index=0, field_index=0, bit_index=0)),
+                Node(input=InputNode(tuple_index=0, field_index=0, bit_index=1)),
+                Node(input=InputNode(tuple_index=0, field_index=0, bit_index=2)),
+                Node(input=InputNode(tuple_index=0, field_index=0, bit_index=3)),
+                Node(input=InputNode(tuple_index=0, field_index=0, bit_index=4)),
+                Node(input=InputNode(tuple_index=0, field_index=0, bit_index=5)),
+                Node(input=InputNode(tuple_index=0, field_index=0, bit_index=6)),
+                Node(input=InputNode(tuple_index=0, field_index=0, bit_index=7)),
                 Node(operation=OperationNode(type=OR)),
                 Node(operation=OperationNode(type=OR)),
                 Node(operation=OperationNode(type=OR)),
@@ -69,14 +73,14 @@ def test_or(stub):
                 Node(operation=OperationNode(type=OR)),
                 Node(operation=OperationNode(type=OR)),
                 Node(operation=OperationNode(type=OR)),
-                Node(output=OutputNode(tuple_index=0, bit_index=0)),
-                Node(output=OutputNode(tuple_index=0, bit_index=1)),
-                Node(output=OutputNode(tuple_index=0, bit_index=2)),
-                Node(output=OutputNode(tuple_index=0, bit_index=3)),
-                Node(output=OutputNode(tuple_index=0, bit_index=4)),
-                Node(output=OutputNode(tuple_index=0, bit_index=5)),
-                Node(output=OutputNode(tuple_index=0, bit_index=6)),
-                Node(output=OutputNode(tuple_index=0, bit_index=7))
+                Node(output=OutputNode(field_index=0, bit_index=0)),
+                Node(output=OutputNode(field_index=0, bit_index=1)),
+                Node(output=OutputNode(field_index=0, bit_index=2)),
+                Node(output=OutputNode(field_index=0, bit_index=3)),
+                Node(output=OutputNode(field_index=0, bit_index=4)),
+                Node(output=OutputNode(field_index=0, bit_index=5)),
+                Node(output=OutputNode(field_index=0, bit_index=6)),
+                Node(output=OutputNode(field_index=0, bit_index=7))
             ],
             edges=[
                 Edge(start=2, end=10),

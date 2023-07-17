@@ -5,7 +5,7 @@ import grpc
 
 from generated.worker_pb2 import MapTask, DataFramePtr, CryptoKeyPtr, InputDataFramePtr
 from generated.worker_pb2_grpc import WorkerStub
-from generated.circuit_pb2 import Circuit, OutputColumn
+from generated.circuit_pb2 import Circuit, OutputColumn, InputStructure
 from generated.node_pb2 import InputNode, OutputNode, Node, OperationNode, NOT
 from generated.common_pb2 import *
 
@@ -41,8 +41,12 @@ def test_negate(stub):
             schema_type=BINFHE
         ),
         circuit=Circuit(
-            input=[
-                INT8
+            inputs=[
+                InputStructure(
+                    fields=[
+                        INT8
+                    ]
+                )
             ],
             output=[
                 OutputColumn(
@@ -51,14 +55,14 @@ def test_negate(stub):
                 )
             ],
             nodes=[
-                Node(input=InputNode(tuple_index=0, bit_index=0)),
-                Node(input=InputNode(tuple_index=0, bit_index=1)),
-                Node(input=InputNode(tuple_index=0, bit_index=2)),
-                Node(input=InputNode(tuple_index=0, bit_index=3)),
-                Node(input=InputNode(tuple_index=0, bit_index=4)),
-                Node(input=InputNode(tuple_index=0, bit_index=5)),
-                Node(input=InputNode(tuple_index=0, bit_index=6)),
-                Node(input=InputNode(tuple_index=0, bit_index=7)),
+                Node(input=InputNode(tuple_index=0, field_index=0, bit_index=0)),
+                Node(input=InputNode(tuple_index=0, field_index=0, bit_index=1)),
+                Node(input=InputNode(tuple_index=0, field_index=0, bit_index=2)),
+                Node(input=InputNode(tuple_index=0, field_index=0, bit_index=3)),
+                Node(input=InputNode(tuple_index=0, field_index=0, bit_index=4)),
+                Node(input=InputNode(tuple_index=0, field_index=0, bit_index=5)),
+                Node(input=InputNode(tuple_index=0, field_index=0, bit_index=6)),
+                Node(input=InputNode(tuple_index=0, field_index=0, bit_index=7)),
                 Node(operation=OperationNode(type=NOT)),
                 Node(operation=OperationNode(type=NOT)),
                 Node(operation=OperationNode(type=NOT)),
@@ -67,14 +71,14 @@ def test_negate(stub):
                 Node(operation=OperationNode(type=NOT)),
                 Node(operation=OperationNode(type=NOT)),
                 Node(operation=OperationNode(type=NOT)),
-                Node(output=OutputNode(tuple_index=0, bit_index=0)),
-                Node(output=OutputNode(tuple_index=0, bit_index=1)),
-                Node(output=OutputNode(tuple_index=0, bit_index=2)),
-                Node(output=OutputNode(tuple_index=0, bit_index=3)),
-                Node(output=OutputNode(tuple_index=0, bit_index=4)),
-                Node(output=OutputNode(tuple_index=0, bit_index=5)),
-                Node(output=OutputNode(tuple_index=0, bit_index=6)),
-                Node(output=OutputNode(tuple_index=0, bit_index=7))
+                Node(output=OutputNode(field_index=0, bit_index=0)),
+                Node(output=OutputNode(field_index=0, bit_index=1)),
+                Node(output=OutputNode(field_index=0, bit_index=2)),
+                Node(output=OutputNode(field_index=0, bit_index=3)),
+                Node(output=OutputNode(field_index=0, bit_index=4)),
+                Node(output=OutputNode(field_index=0, bit_index=5)),
+                Node(output=OutputNode(field_index=0, bit_index=6)),
+                Node(output=OutputNode(field_index=0, bit_index=7))
             ],
             edges=[
                 Edge(start=0, end=8),

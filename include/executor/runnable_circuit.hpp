@@ -4,13 +4,14 @@
 #include <memory>
 
 #include "herd/common/dag.hpp"
+#include "herd/common/model/data_type.hpp"
 
 #include "executor/runnable_node.hpp"
 
 
 struct RunnableCircuit
 {
-	std::vector<unsigned int> input;
+	std::vector<std::vector<unsigned int>> inputs;
 	std::vector<unsigned int> output;
 
 	herd::common::DAG<runnable_node_ptr_t> circuit_graph;

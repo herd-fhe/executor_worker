@@ -5,9 +5,9 @@
 #include "spdlog/spdlog.h"
 
 #include "herd/common/model/exception.hpp"
+#include "herd/common/native_type_mapping.hpp"
 
 #include "crypto/exception.hpp"
-
 
 
 namespace crypto
@@ -80,5 +80,29 @@ namespace crypto
 		{
 			throw herd::common::IOWriteError("Failed to write to output data frame");
 		}
+	}
+
+	CryptoVector Crypto::create_field_from_description(unsigned int data_width)
+	{
+		CryptoVector vector(data_width);
+
+		for(std::size_t i = 0; i < data_width; ++i)
+		{
+			vector[i] = create_empty_value();
+		}
+
+		return vector;
+	}
+	std::vector<CryptoVector> Crypto::create_row_from_description(const std::vector<unsigned int>& description)
+	{
+		std::vector<CryptoVector> vectors;
+		vectors.reserve(description.size());
+
+		for(const auto data_type: description)
+		{
+			vectors.emplace_back(create_field_from_description(data_type));
+		}
+
+		return vectors;
 	}
 }

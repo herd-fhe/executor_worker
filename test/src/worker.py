@@ -4,7 +4,7 @@ import subprocess
 import os
 
 from generated.worker_pb2_grpc import WorkerStub
-from generated.worker_pb2 import MapTask
+from generated.worker_pb2 import MapTask, ReduceTask
 from generated.common_pb2 import *
 
 
@@ -66,7 +66,7 @@ def decrypt_data(temp_dir, session, output_data_frame, row_size, row_count):
 
 def single_frame_map_task(stub: WorkerStub, task: MapTask, copy_frame=True, copy_key=True):
     with tempfile.TemporaryDirectory() as tmp_dir_name:
-        input_size = sum([map_data_type_to_width(column) for column in task.circuit.input])
+        input_size = sum([map_data_type_to_width(column) for column in task.circuit.inputs[0].fields])
         output_size = sum([map_data_type_to_width(column.data_type) for column in task.circuit.output])
         row_count = task.input_data_frame_ptr.row_count
 
@@ -85,3 +85,25 @@ def single_frame_map_task(stub: WorkerStub, task: MapTask, copy_frame=True, copy
             str(task.output_data_frame_ptr.partition))
 
         return decrypt_data(tmp_dir_name, task.session_uuid, output_data_frame_name, output_size, row_count)
+
+
+def single_frame_reduce_task(stub: WorkerStub, task: ReduceTask, copy_frame=True, copy_key=True):
+    with tempfile.TemporaryDirectory() as tmp_dir_name:
+        input_size = sum([map_data_type_to_width(column) for column in task.circuit.inputs[1].fields])
+        output_size = sum([map_data_type_to_width(column.data_type) for column in task.circuit.output])
+
+        setup_resources(tmp_dir_name,
+                        task.session_uuid,
+                        task.input_data_frame_ptrs[0].pointer.data_frame_uuid, task.output_data_frame_ptr.data_frame_uuid,
+                        task.input_data_frame_ptrs[0].pointer.partition,
+                        1, #only BINFHE support
+                        input_size,
+                        copy_frame, copy_key)
+
+        stub.reduce(task)
+
+        output_data_frame_name = os.path.join(
+            task.output_data_frame_ptr.data_frame_uuid,
+            str(task.output_data_frame_ptr.partition))
+
+        return decrypt_data(tmp_dir_name, task.session_uuid, output_data_frame_name, output_size, 1)

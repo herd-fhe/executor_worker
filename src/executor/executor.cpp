@@ -28,20 +28,47 @@ void Executor::set_circuit(RunnableCircuit circuit) noexcept
 	circuit_ = std::move(circuit);
 }
 
-void Executor::run()
+void Executor::map()
 {
-	spdlog::info("Executor started");
-	for(auto& input: inputs_)
+	spdlog::info("Executor started - map");
+	for(auto const& input: inputs_)
 	{
 		for(uint64_t i = 0; i < input->row_count(); ++i)
 		{
 			spdlog::info("Processing row: {}...", std::to_string(i));
-			auto row = input->read_row(*crypto_);
-			auto output_row = tree_runner_.execute(circuit_, std::move(row));
+			std::vector<std::vector<crypto::CryptoVector>> input_arguments;
+			input_arguments.emplace_back(input->read_row(*crypto_));
+
+			auto output_row = tree_runner_.execute(circuit_, std::move(input_arguments));
 			circuit_.reset_circuit();
 			output_->write_row(output_row, *crypto_);
 			spdlog::info("Row: {} processed", i);
 		}
 	}
-	spdlog::info("Executor finished");
+	spdlog::info("Executor finished - map");
+}
+
+void Executor::reduce()
+{
+	spdlog::info("Executor started - reduce");
+
+	auto aggregated_value = crypto_->create_row_from_description(circuit_.output);
+
+	for(auto const& input: inputs_)
+	{
+		for(uint64_t i = 0; i < input->row_count(); ++i)
+		{
+			spdlog::info("Processing row: {}...", std::to_string(i));
+			std::vector<std::vector<crypto::CryptoVector>> input_arguments;
+			input_arguments.emplace_back(std::move(aggregated_value));
+			input_arguments.emplace_back(input->read_row(*crypto_));
+
+			aggregated_value = tree_runner_.execute(circuit_, std::move(input_arguments));
+			circuit_.reset_circuit();
+			spdlog::info("Row: {} processed", i);
+		}
+	}
+
+	output_->write_row(aggregated_value, *crypto_);
+	spdlog::info("Executor finished - reduce");
 }

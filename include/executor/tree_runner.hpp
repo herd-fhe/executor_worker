@@ -20,7 +20,7 @@ public:
 	~TreeRunner();
 
 	void set_crypto(std::shared_ptr<crypto::Crypto> crypto) noexcept;
-	std::vector<crypto::CryptoVector> execute(RunnableCircuit& runnable_circuit, std::vector<crypto::CryptoVector>&& input);
+	std::vector<crypto::CryptoVector> execute(RunnableCircuit& runnable_circuit, std::vector<std::vector<crypto::CryptoVector>>&& input);
 
 private:
 	using graph_node_t = decltype(RunnableCircuit::circuit_graph)::Node<false>;
@@ -40,7 +40,7 @@ private:
 	std::condition_variable todo_cv_;
 	std::size_t todo_job_counter_;
 
-	std::vector<crypto::CryptoVector> input_;
+	std::vector<std::vector<crypto::CryptoVector>> input_;
 	std::vector<crypto::CryptoVector> output_;
 
 	std::queue<graph_node_t> queue_;
