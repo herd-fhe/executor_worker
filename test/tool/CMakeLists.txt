@@ -55,6 +55,7 @@ find_package(Threads REQUIRED)
 find_package(OpenMP REQUIRED)
 
 add_executable(dataframe_decryptor)
+target_compile_features(dataframe_decryptor PRIVATE cxx_std_20)
 
 target_sources(
         dataframe_decryptor

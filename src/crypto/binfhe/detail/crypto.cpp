@@ -101,7 +101,15 @@ namespace crypto::binfhe::detail
 				return nullptr;
 		}
 
-		return std::make_unique<CryptoValueImpl>(keyset_.context().EvalBinGate(gate, in_a.value(), in_b.value()));
+		if(in_a.value() != in_b.value())
+		{
+			return std::make_unique<CryptoValueImpl>(keyset_.context().EvalBinGate(gate, in_a.value(), in_b.value()));
+		}
+		else
+		{
+			auto temp_value = keyset_.context().Bootstrap(in_a.value());
+			return std::make_unique<CryptoValueImpl>(keyset_.context().EvalBinGate(gate, temp_value, in_b.value()));
+		}
 	}
 	crypto_value_ptr_t CryptoImpl::unary_op(herd::common::Operation operation, const CryptoValue& input)
 	{
