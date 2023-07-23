@@ -54,29 +54,51 @@ find_package(OpenFHE REQUIRED)
 find_package(Threads REQUIRED)
 find_package(OpenMP REQUIRED)
 
-add_executable(dataframe_decryptor)
-target_compile_features(dataframe_decryptor PRIVATE cxx_std_20)
+add_executable(crypto_tool)
+target_compile_features(crypto_tool PRIVATE cxx_std_20)
 
+target_include_directories(crypto_tool PRIVATE include)
 target_sources(
-        dataframe_decryptor
+        crypto_tool
         PRIVATE
-        dataframe_decryptor.cpp
+        src/main.cpp
+        src/cli/parameter.cpp
+        src/cli/subcommand.cpp
+        src/cli/command_line.cpp
+        src/cli/parameter_proxy.cpp
+
+        src/commands/key_command.cpp
+        src/commands/encryption_command.cpp
+
+        src/encryption/key.cpp
+        src/encryption/crypto.cpp
+
+        include/cli/command_line.hpp
+        include/cli/subcommand.hpp
+        include/cli/parameter.hpp
+        include/cli/parameter_proxy.hpp
+
+        include/commands/key_command.hpp
+        include/commands/encryption_command.hpp
+
+        include/encryption/key.hpp
+        include/encryption/crypto.hpp
 )
 
 target_compile_definitions(
-        dataframe_decryptor
+        crypto_tool
         PUBLIC
         MATHBACKEND=2
 )
 
 target_link_libraries(
-        dataframe_decryptor
+        crypto_tool
         PRIVATE
         warnings_target
 )
 
 target_link_libraries(
-        dataframe_decryptor
+        crypto_tool
         PRIVATE
         pthread
 
@@ -86,47 +108,7 @@ target_link_libraries(
 )
 
 target_include_directories(
-        dataframe_decryptor
-        SYSTEM PRIVATE
-        ${OpenFHE_INCLUDE}
-        ${OpenFHE_INCLUDE}/third-party/include
-        ${OpenFHE_INCLUDE}/core
-        ${OpenFHE_INCLUDE}/pke
-        ${OpenFHE_INCLUDE}/binfhe
-)
-
-add_executable(data_generator)
-
-target_sources(
-        data_generator
-        PRIVATE
-        data_generator.cpp
-)
-
-target_compile_definitions(
-        data_generator
-        PUBLIC
-        MATHBACKEND=2
-)
-
-target_link_libraries(
-        dataframe_decryptor
-        PRIVATE
-        warnings_target
-)
-
-target_link_libraries(
-        data_generator
-        PRIVATE
-        pthread
-
-        OPENFHEcore
-        OPENFHEbinfhe
-        OpenMP::OpenMP_CXX
-)
-
-target_include_directories(
-        data_generator
+        crypto_tool
         SYSTEM PRIVATE
         ${OpenFHE_INCLUDE}
         ${OpenFHE_INCLUDE}/third-party/include

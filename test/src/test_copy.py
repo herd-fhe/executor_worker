@@ -1,4 +1,5 @@
 import os
+from typing import Tuple
 
 import pytest
 import grpc
@@ -9,7 +10,7 @@ from generated.circuit_pb2 import Circuit, OutputColumn, InputStructure
 from generated.node_pb2 import InputNode, OutputNode, Node
 from generated.common_pb2 import *
 
-from worker import single_frame_map_task
+from worker import generate_data_frame, map_task, decrypt_data_frame, random_uuid
 
 
 @pytest.fixture()
@@ -23,19 +24,42 @@ def stub():
     channel.close()
 
 
-def test_copy_8(stub):
+def test_copy_8(stub, crypto_tool, session, key: Tuple[str, str]):
+    context, private_key = key
+
+    partition = 0
+    input_data = [
+        '11111111',
+        '01111111',
+        '00111111',
+        '00011111',
+        '00001111',
+        '00000111',
+        '00000011',
+        '00000001',
+        '00000000',
+        '10000000',
+        '11000000',
+        '11100000',
+        '11110000',
+        '11111000',
+        '11111100',
+        '11111110'
+    ]
+    data_frame = generate_data_frame(crypto_tool, session, context, private_key, partition, input_data)
+
     task = MapTask(
-        session_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
+        session_uuid=session,
         input_data_frame_ptr=InputDataFramePtr(
             pointer=DataFramePtr(
-                data_frame_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
-                partition=0
+                data_frame_uuid=data_frame,
+                partition=partition
             ),
-            row_count=16,
+            row_count=len(input_data),
         ),
         output_data_frame_ptr=DataFramePtr(
-            data_frame_uuid="f5a1afbc-7090-483b-8602-eaca0d5c7620",
-            partition=0
+            data_frame_uuid=random_uuid(),
+            partition=partition
         ),
         crypto_key_ptr=CryptoKeyPtr(
             schema_type=BINFHE
@@ -85,7 +109,14 @@ def test_copy_8(stub):
         )
     )
 
-    result = single_frame_map_task(stub, task)
+    map_task(stub, task)
+
+    result = decrypt_data_frame(crypto_tool,
+                                session, context, private_key,
+                                task.output_data_frame_ptr.data_frame_uuid,
+                                task.output_data_frame_ptr.partition,
+                                len(input_data[0]), len(input_data))
+
     assert [
                '11111111',
                '01111111',
@@ -106,19 +137,34 @@ def test_copy_8(stub):
            ] == result
 
 
-def test_copy_16(stub):
+def test_copy_16(stub, crypto_tool, session, key: Tuple[str, str]):
+    context, private_key = key
+
+    partition = 1
+    input_data = [
+        '1111111111111111', '0111111111111111', '0011111111111111', '0001111111111111',
+        '0000111111111111', '0000011111111111', '0000001111111111', '0000000111111111',
+        '0000000011111111', '0000000001111111', '0000000000111111', '0000000000011111',
+        '0000000000001111', '0000000000000111', '0000000000000011', '0000000000000001',
+        '0000000000000000', '1000000000000000', '1100000000000000', '1110000000000000',
+        '1111000000000000', '1111100000000000', '1111110000000000', '1111111000000000',
+        '1111111100000000', '1111111110000000', '1111111111000000', '1111111111100000',
+        '1111111111110000', '1111111111111000', '1111111111111100', '1111111111111110',
+    ]
+    data_frame = generate_data_frame(crypto_tool, session, context, private_key, partition, input_data)
+
     task = MapTask(
-        session_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
+        session_uuid=session,
         input_data_frame_ptr=InputDataFramePtr(
             pointer=DataFramePtr(
-                data_frame_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
-                partition=1
+                data_frame_uuid=data_frame,
+                partition=partition
             ),
             row_count=32,
         ),
         output_data_frame_ptr=DataFramePtr(
-            data_frame_uuid="f5a1afbc-7090-483b-8602-eaca0d5c7620",
-            partition=1
+            data_frame_uuid=random_uuid(),
+            partition=partition
         ),
         crypto_key_ptr=CryptoKeyPtr(
             schema_type=BINFHE
@@ -192,7 +238,13 @@ def test_copy_16(stub):
         )
     )
 
-    result = single_frame_map_task(stub, task)
+    map_task(stub, task)
+
+    result = decrypt_data_frame(crypto_tool,
+                                session, context, private_key,
+                                task.output_data_frame_ptr.data_frame_uuid,
+                                task.output_data_frame_ptr.partition,
+                                len(input_data[0]), len(input_data))
     assert [
                '1111111111111111', '0111111111111111', '0011111111111111', '0001111111111111',
                '0000111111111111', '0000011111111111', '0000001111111111', '0000000111111111',
@@ -205,19 +257,34 @@ def test_copy_16(stub):
            ] == result
 
 
-def test_copy_2_8(stub):
+def test_copy_2_8(stub, crypto_tool, session, key: Tuple[str, str]):
+    context, private_key = key
+
+    partition = 2
+    input_data = [
+        '1111111111111111', '0111111111111111', '0011111111111111', '0001111111111111',
+        '0000111111111111', '0000011111111111', '0000001111111111', '0000000111111111',
+        '0000000011111111', '0000000001111111', '0000000000111111', '0000000000011111',
+        '0000000000001111', '0000000000000111', '0000000000000011', '0000000000000001',
+        '0000000000000000', '1000000000000000', '1100000000000000', '1110000000000000',
+        '1111000000000000', '1111100000000000', '1111110000000000', '1111111000000000',
+        '1111111100000000', '1111111110000000', '1111111111000000', '1111111111100000',
+        '1111111111110000', '1111111111111000', '1111111111111100', '1111111111111110',
+    ]
+    data_frame = generate_data_frame(crypto_tool, session, context, private_key, partition, input_data)
+
     task = MapTask(
-        session_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
+        session_uuid=session,
         input_data_frame_ptr=InputDataFramePtr(
             pointer=DataFramePtr(
-                data_frame_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
-                partition=2
+                data_frame_uuid=data_frame,
+                partition=partition
             ),
-            row_count=32,
+            row_count=len(input_data),
         ),
         output_data_frame_ptr=DataFramePtr(
-            data_frame_uuid="f5a1afbc-7090-483b-8602-eaca0d5c7620",
-            partition=2
+            data_frame_uuid=random_uuid(),
+            partition=partition
         ),
         crypto_key_ptr=CryptoKeyPtr(
             schema_type=BINFHE
@@ -296,7 +363,13 @@ def test_copy_2_8(stub):
         )
     )
 
-    result = single_frame_map_task(stub, task)
+    map_task(stub, task)
+    result = decrypt_data_frame(crypto_tool,
+                                session, context, private_key,
+                                task.output_data_frame_ptr.data_frame_uuid,
+                                task.output_data_frame_ptr.partition,
+                                len(input_data[0]), len(input_data))
+
     assert [
                '1111111111111111', '0111111111111111', '0011111111111111', '0001111111111111',
                '0000111111111111', '0000011111111111', '0000001111111111', '0000000111111111',

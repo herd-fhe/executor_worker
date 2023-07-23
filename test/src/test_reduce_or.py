@@ -1,4 +1,5 @@
 import os
+from typing import Tuple
 
 import pytest
 import grpc
@@ -9,7 +10,7 @@ from generated.circuit_pb2 import Circuit, OutputColumn, InputStructure
 from generated.node_pb2 import InputNode, OutputNode, Node, OperationNode, OR
 from generated.common_pb2 import *
 
-from worker import single_frame_reduce_task
+from worker import generate_data_frame, random_uuid, decrypt_data_frame, reduce_task
 
 
 @pytest.fixture()
@@ -23,20 +24,32 @@ def stub():
     channel.close()
 
 
-def test_reduce_or(stub):
+def test_reduce_or(stub, crypto_tool, session, key: Tuple[str, str]):
+    context, private_key = key
+
+    partition = 3
+    input_data = [
+        '01111101',
+        '01111101',
+        '00111101',
+        '00011101',
+        '00001101'
+    ]
+    data_frame = generate_data_frame(crypto_tool, session, context, private_key, partition, input_data)
+
     task = ReduceTask(
-        session_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
+        session_uuid=session,
         input_data_frame_ptrs=[
             InputDataFramePtr(
                 pointer=DataFramePtr(
-                    data_frame_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
+                    data_frame_uuid=data_frame,
                     partition=3
                 ),
-                row_count=16,
+                row_count=len(input_data),
             )
         ],
         output_data_frame_ptr=DataFramePtr(
-            data_frame_uuid="f5a1afbc-7090-483b-8602-eaca0d5cf620",
+            data_frame_uuid=random_uuid(),
             partition=0
         ),
         crypto_key_ptr=CryptoKeyPtr(
@@ -124,7 +137,14 @@ def test_reduce_or(stub):
         )
     )
 
-    result = single_frame_reduce_task(stub, task)
+    reduce_task(stub, task)
+
+    result = decrypt_data_frame(crypto_tool,
+                                session, context, private_key,
+                                task.output_data_frame_ptr.data_frame_uuid,
+                                task.output_data_frame_ptr.partition,
+                                len(input_data[0]), 1)
+
     assert [
-               '11111111',
+                   '01111101',
            ] == result
