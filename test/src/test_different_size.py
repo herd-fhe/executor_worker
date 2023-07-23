@@ -1,4 +1,5 @@
 import os
+from typing import Tuple
 
 import pytest
 import grpc
@@ -9,7 +10,7 @@ from generated.circuit_pb2 import Circuit, OutputColumn, InputStructure
 from generated.node_pb2 import OutputNode, Node, ConstantNode
 from generated.common_pb2 import *
 
-from worker import single_frame_map_task
+from worker import generate_data_frame, map_task, decrypt_data_frame, random_uuid
 
 
 @pytest.fixture()
@@ -23,19 +24,30 @@ def stub():
     channel.close()
 
 
-def test_different_size(stub):
+def test_different_size(stub, crypto_tool, session, key: Tuple[str, str]):
+    context, private_key = key
+
+    partition = 3
+    input_data = [
+        '11111111',
+        '11111000',
+        '00000000',
+        '00111111',
+    ]
+    data_frame = generate_data_frame(crypto_tool, session, context, private_key, partition, input_data)
+
     task = MapTask(
-        session_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
+        session_uuid=session,
         input_data_frame_ptr=InputDataFramePtr(
             pointer=DataFramePtr(
-                data_frame_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
-                partition=3
+                data_frame_uuid=data_frame,
+                partition=partition
             ),
-            row_count=4,
+            row_count=len(input_data),
         ),
         output_data_frame_ptr=DataFramePtr(
-            data_frame_uuid="f5a1afbc-7090-483b-8602-eaca0d5c7620",
-            partition=3
+            data_frame_uuid=random_uuid(),
+            partition=partition
         ),
         crypto_key_ptr=CryptoKeyPtr(
             schema_type=BINFHE
@@ -105,7 +117,14 @@ def test_different_size(stub):
         )
     )
 
-    result = single_frame_map_task(stub, task)
+    map_task(stub, task)
+
+    result = decrypt_data_frame(crypto_tool,
+                                session, context, private_key,
+                                task.output_data_frame_ptr.data_frame_uuid,
+                                task.output_data_frame_ptr.partition,
+                                len(input_data[0]*2), len(input_data))
+
     assert [
                '1001101110011011', '1001101110011011',
                '1001101110011011', '1001101110011011',

@@ -66,8 +66,7 @@ jobs:
       - name: Chmod utilities
         working-directory: ${{github.workspace}}/test_home
         run: |
-          chmod +x data_generator
-          chmod +x dataframe_decryptor
+          chmod +x crypto_tool
         shell: bash
 
       - name: Spin up worker

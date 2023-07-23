@@ -1,4 +1,5 @@
 import os
+from typing import Tuple
 
 import pytest
 import grpc
@@ -9,7 +10,7 @@ from generated.circuit_pb2 import Circuit, OutputColumn, InputStructure
 from generated.node_pb2 import InputNode, OutputNode, Node, ConstantNode
 from generated.common_pb2 import *
 
-from worker import single_frame_map_task
+from worker import random_uuid, generate_data_frame, map_task
 
 
 @pytest.fixture()
@@ -23,19 +24,30 @@ def stub():
     channel.close()
 
 
-def test_wrong_out_bit(stub):
+def test_wrong_out_bit(stub, crypto_tool, session, key: Tuple[str, str]):
+    context, private_key = key
+
+    partition = 3
+    input_data = [
+        '11111111',
+        '01111111',
+        '00111111',
+        '00011111'
+    ]
+    data_frame = generate_data_frame(crypto_tool, session, context, private_key, partition, input_data)
+
     task = MapTask(
-        session_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
+        session_uuid=session,
         input_data_frame_ptr=InputDataFramePtr(
             pointer=DataFramePtr(
-                data_frame_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
-                partition=3
+                data_frame_uuid=data_frame,
+                partition=partition
             ),
-            row_count=4
+            row_count=len(input_data)
         ),
         output_data_frame_ptr=DataFramePtr(
-            data_frame_uuid="f5a1afbc-7090-483b-8602-eaca0d5c7620",
-            partition=3
+            data_frame_uuid=random_uuid(),
+            partition=partition
         ),
         crypto_key_ptr=CryptoKeyPtr(
             schema_type=BINFHE
@@ -86,20 +98,31 @@ def test_wrong_out_bit(stub):
     )
 
     with pytest.raises(grpc.RpcError) as e_info:
-        single_frame_map_task(stub, task)
+        map_task(stub, task)
 
     assert e_info.value.code() == grpc.StatusCode.INTERNAL
 
 
-def test_wrong_out_tuple(stub):
+def test_wrong_out_tuple(stub, crypto_tool, session, key: Tuple[str, str]):
+    context, private_key = key
+
+    partition = 3
+    input_data = [
+        '11111111',
+        '01111111',
+        '00111111',
+        '00011111'
+    ]
+    data_frame = generate_data_frame(crypto_tool, session, context, private_key, partition, input_data)
+
     task = MapTask(
-        session_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
+        session_uuid=session,
         input_data_frame_ptr=InputDataFramePtr(
             pointer=DataFramePtr(
-                data_frame_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
-                partition=3
+                data_frame_uuid=data_frame,
+                partition=partition
             ),
-            row_count=4,
+            row_count=len(input_data),
         ),
         output_data_frame_ptr=DataFramePtr(
             data_frame_uuid="f5a1afbc-7090-483b-8602-eaca0d5c7620",
@@ -154,24 +177,48 @@ def test_wrong_out_tuple(stub):
     )
 
     with pytest.raises(grpc.RpcError) as e_info:
-        single_frame_map_task(stub, task)
+        map_task(stub, task)
 
     assert e_info.value.code() == grpc.StatusCode.INTERNAL
 
 
-def test_wrong_in_tuple(stub):
+def test_wrong_in_tuple(stub, crypto_tool, session, key: Tuple[str, str]):
+    context, private_key = key
+
+    partition = 3
+    input_data = [
+        '11111111',
+        '01111111',
+        '00111111',
+        '00011111',
+        '00001111',
+        '00000111',
+        '00000011',
+        '00000001',
+        '00000000',
+        '10000000',
+        '11000000',
+        '11100000',
+        '11110000',
+        '11111000',
+        '11111100',
+        '11111110'
+    ]
+    data_frame = generate_data_frame(crypto_tool, session, context, private_key, partition, input_data)
+
+
     task = MapTask(
-        session_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
+        session_uuid=session,
         input_data_frame_ptr=InputDataFramePtr(
             pointer=DataFramePtr(
-                data_frame_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
-                partition=0
+                data_frame_uuid=data_frame,
+                partition=partition
             ),
-            row_count=16,
+            row_count=len(input_data),
         ),
         output_data_frame_ptr=DataFramePtr(
-            data_frame_uuid="f5a1afbc-7090-483b-8602-eaca0d5c7620",
-            partition=0
+            data_frame_uuid=random_uuid(),
+            partition=partition
         ),
         crypto_key_ptr=CryptoKeyPtr(
             schema_type=BINFHE
@@ -222,24 +269,47 @@ def test_wrong_in_tuple(stub):
     )
 
     with pytest.raises(grpc.RpcError) as e_info:
-        single_frame_map_task(stub, task)
+        map_task(stub, task)
 
     assert e_info.value.code() == grpc.StatusCode.INTERNAL
 
 
-def test_wrong_in_field(stub):
+def test_wrong_in_field(stub, crypto_tool, session, key: Tuple[str, str]):
+    context, private_key = key
+
+    partition = 3
+    input_data = [
+        '11111111',
+        '01111111',
+        '00111111',
+        '00011111',
+        '00001111',
+        '00000111',
+        '00000011',
+        '00000001',
+        '00000000',
+        '10000000',
+        '11000000',
+        '11100000',
+        '11110000',
+        '11111000',
+        '11111100',
+        '11111110'
+    ]
+    data_frame = generate_data_frame(crypto_tool, session, context, private_key, partition, input_data)
+
     task = MapTask(
-        session_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
+        session_uuid=session,
         input_data_frame_ptr=InputDataFramePtr(
             pointer=DataFramePtr(
-                data_frame_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
-                partition=0
+                data_frame_uuid=data_frame,
+                partition=partition
             ),
-            row_count=16,
+            row_count=len(input_data),
         ),
         output_data_frame_ptr=DataFramePtr(
             data_frame_uuid="f5a1afbc-7090-483b-8602-eaca0d5c7620",
-            partition=0
+            partition=partition
         ),
         crypto_key_ptr=CryptoKeyPtr(
             schema_type=BINFHE
@@ -290,24 +360,47 @@ def test_wrong_in_field(stub):
     )
 
     with pytest.raises(grpc.RpcError) as e_info:
-        single_frame_map_task(stub, task)
+        map_task(stub, task)
 
     assert e_info.value.code() == grpc.StatusCode.INTERNAL
 
 
-def test_wrong_in_bit(stub):
+def test_wrong_in_bit(stub, crypto_tool, session, key: Tuple[str, str]):
+    context, private_key = key
+
+    partition = 3
+    input_data = [
+        '11111111',
+        '01111111',
+        '00111111',
+        '00011111',
+        '00001111',
+        '00000111',
+        '00000011',
+        '00000001',
+        '00000000',
+        '10000000',
+        '11000000',
+        '11100000',
+        '11110000',
+        '11111000',
+        '11111100',
+        '11111110'
+    ]
+    data_frame = generate_data_frame(crypto_tool, session, context, private_key, partition, input_data)
+
     task = MapTask(
-        session_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
+        session_uuid=session,
         input_data_frame_ptr=InputDataFramePtr(
             pointer=DataFramePtr(
-                data_frame_uuid="2ebb8249-0249-4d19-86f8-07ffa5c258cc",
-                partition=0
+                data_frame_uuid=data_frame,
+                partition=partition
             ),
-            row_count=16,
+            row_count=len(input_data),
         ),
         output_data_frame_ptr=DataFramePtr(
-            data_frame_uuid="f5a1afbc-7090-483b-8602-eaca0d5c7620",
-            partition=0
+            data_frame_uuid=random_uuid(),
+            partition=partition
         ),
         crypto_key_ptr=CryptoKeyPtr(
             schema_type=BINFHE
@@ -358,6 +451,6 @@ def test_wrong_in_bit(stub):
     )
 
     with pytest.raises(grpc.RpcError) as e_info:
-        single_frame_map_task(stub, task)
+        map_task(stub, task)
 
     assert e_info.value.code() == grpc.StatusCode.INTERNAL
