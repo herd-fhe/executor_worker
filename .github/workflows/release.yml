@@ -52,10 +52,10 @@ jobs:
         working-directory: ${{github.workspace}}
         shell: bash
         run: |
-          tar -czvf herdman-worker.tar.gz release
+          tar -czvf herdsman-worker.tar.gz release
 
       - name: Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: ${{github.workspace}}/herdman-worker.tar.gz
-          name: herdman-worker-${{github.ref_name}}
+          artifacts: ${{github.workspace}}/herdsman-worker.tar.gz
+          name: herdsman-worker-${{github.ref_name}}

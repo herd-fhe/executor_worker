@@ -2,7 +2,7 @@ name: Component tests
 
 on:
   workflow_dispatch:
-
+  workflow_call:
   schedule:
     - cron: 0 0 * * MON
 
