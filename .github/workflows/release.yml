@@ -1,0 +1,61 @@
+name: Publish worker artifacts
+
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+
+jobs:
+  build_test:
+    name: 'Build & test'
+    uses: ./.github/workflows/test.yml
+
+  deploy:
+    name: 'Release'
+    needs: [build_test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download worker artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: executor-worker
+          path: ${{github.workspace}}
+
+      - name: Download test utility artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: test-utils
+          path: ${{github.workspace}}
+
+      - name: Prepare release directory
+        working-directory: ${{github.workspace}}
+        shell: bash
+        run: |
+          mkdir release
+
+      - name: Chmod
+        working-directory: ${{github.workspace}}
+        run: |
+          chmod +x executor_worker
+          chmod +x crypto_tool
+        shell: bash
+
+      - name: Copy artifacts
+        working-directory: ${{github.workspace}}
+        shell: bash
+        run: |
+          cp ${GITHUB_WORKSPACE}/executor_worker ${GITHUB_WORKSPACE}/release/
+          cp ${GITHUB_WORKSPACE}/crypto_tool ${GITHUB_WORKSPACE}/release/
+
+      - name: Pack artifacts
+        working-directory: ${{github.workspace}}
+        shell: bash
+        run: |
+          tar -czvf herdman-worker.tar.gz release
+
+      - name: Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: ${{github.workspace}}/herdman-worker.tar.gz
+          name: herdman-worker-${{github.ref_name}}
