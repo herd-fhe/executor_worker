@@ -76,12 +76,15 @@ find_package(Threads REQUIRED)
 find_package(OpenMP REQUIRED)
 
 ## Herd - libraries
+add_subdirectory(proto)
 add_subdirectory(common)
+add_subdirectory(mappers)
 
 # Targets
 add_library(worker_base_runtime STATIC)
+add_library(worker::base_runtime ALIAS worker_base_runtime)
 target_include_directories(worker_base_runtime PRIVATE include)
-target_include_directories(worker_base_runtime INTERFACE include)
+target_include_directories(worker_base_runtime PUBLIC include)
 
 target_sources(
         worker_base_runtime
@@ -104,6 +107,8 @@ target_sources(
         src/base_runtime/crypto/binfhe/detail/crypto.cpp
         src/base_runtime/crypto/binfhe/detail/crypto_value.cpp
         src/base_runtime/crypto/binfhe/detail/keyset.cpp
+
+        src/base_runtime/mapper/circuit.cpp
 
         include/base_runtime/config.hpp
         include//base_runtime/util/config_loader.hpp
@@ -129,6 +134,8 @@ target_sources(
         include/base_runtime/executor/runnable_node.hpp
         include/base_runtime/executor/tree_runner.hpp
         include/base_runtime/executor/exception.hpp
+
+        include/base_runtime/mapper/circuit.hpp
 )
 
 target_compile_definitions(
@@ -146,6 +153,14 @@ target_link_libraries(
 
 target_link_libraries(
         worker_base_runtime
+        PUBLIC
+        herd_common
+        herd_proto
+        herd_dto_mappers
+)
+
+target_link_libraries(
+        worker_base_runtime
         PRIVATE
         pthread
 
@@ -154,8 +169,6 @@ target_link_libraries(
         OpenMP::OpenMP_CXX
 
         spdlog::spdlog_header_only
-
-        herd_common
 )
 
 target_include_directories(
@@ -171,9 +184,6 @@ target_include_directories(
 
 option(BUILD_GRPC_RUNTIME "Enable GRPC Runtime" TRUE)
 if(BUILD_GRPC_RUNTIME)
-    add_subdirectory(proto)
-    add_subdirectory(mappers)
-
     add_executable(executor_worker)
 
     target_include_directories(executor_worker PRIVATE include)
@@ -184,10 +194,8 @@ if(BUILD_GRPC_RUNTIME)
 
             src/grpc/main.cpp
             src/grpc/controller/worker_controller.cpp
-            src/grpc/mapper/circuit.cpp
 
             include/grpc/controller/worker_controller.hpp
-            include/grpc/mapper/circuit.hpp
     )
 
     target_link_libraries(
