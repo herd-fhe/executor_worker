@@ -81,86 +81,86 @@ add_subdirectory(common)
 add_subdirectory(mappers)
 
 # Targets
-
-## Executor
-add_executable(executor_worker)
-
-target_include_directories(executor_worker PRIVATE include)
+add_library(worker_base_runtime STATIC)
+add_library(worker::base_runtime ALIAS worker_base_runtime)
+target_include_directories(worker_base_runtime PRIVATE include)
+target_include_directories(worker_base_runtime PUBLIC include)
 
 target_sources(
-        executor_worker
+        worker_base_runtime
         PRIVATE
+        src/base_runtime/data_frame/data_frame.cpp
+        src/base_runtime/data_frame/data_frame_input.cpp
+        src/base_runtime/data_frame/data_frame_output.cpp
 
-        src/main.cpp
+        src/base_runtime/util/config_loader.cpp
 
-        src/controller/worker_controller.cpp
+        src/base_runtime/executor/runnable_circuit.cpp
+        src/base_runtime/executor/executor.cpp
+        src/base_runtime/executor/tree_runner.cpp
 
-        src/util/config_loader.cpp
+        src/base_runtime/crypto/crypto.cpp
+        src/base_runtime/crypto/crypto_vector.cpp
+        src/base_runtime/crypto/crypto_factory.cpp
 
-        src/data_frame/data_frame.cpp
-        src/data_frame/data_frame_input.cpp
-        src/data_frame/data_frame_output.cpp
+        src/base_runtime/crypto/binfhe/binfhe.cpp
+        src/base_runtime/crypto/binfhe/detail/crypto.cpp
+        src/base_runtime/crypto/binfhe/detail/crypto_value.cpp
+        src/base_runtime/crypto/binfhe/detail/keyset.cpp
 
-        src/executor/runnable_circuit.cpp
-        src/executor/executor.cpp
-        src/executor/tree_runner.cpp
+        src/base_runtime/mapper/circuit.cpp
 
-        src/mapper/circuit.cpp
+        include/base_runtime/config.hpp
+        include//base_runtime/util/config_loader.hpp
 
-        src/crypto/crypto.cpp
-        src/crypto/crypto_vector.cpp
-        src/crypto/crypto_factory.cpp
+        include/base_runtime/crypto/exception.hpp
+        include/base_runtime/crypto/crypto.hpp
+        include/base_runtime/crypto/i_keyset.hpp
+        include/base_runtime/crypto/crypto_value.hpp
+        include/base_runtime/crypto/crypto_vector.hpp
+        include/base_runtime/crypto/crypto_factory.hpp
 
-        src/crypto/binfhe/binfhe.cpp
-        src/crypto/binfhe/detail/crypto.cpp
-        src/crypto/binfhe/detail/crypto_value.cpp
-        src/crypto/binfhe/detail/keyset.cpp
+        include/base_runtime/crypto/binfhe/binfhe.hpp
+        include/base_runtime/crypto/binfhe/detail/crypto.hpp
+        include/base_runtime/crypto/binfhe/detail/crypto_value.hpp
+        include/base_runtime/crypto/binfhe/detail/keyset.hpp
 
-        include/controller/worker_controller.hpp
+        include/base_runtime/data_frame/data_frame.hpp
+        include/base_runtime/data_frame/data_frame_input.hpp
+        include/base_runtime/data_frame/data_frame_output.hpp
 
-        include/config.hpp
-        include/util/config_loader.hpp
+        include/base_runtime/executor/executor.hpp
+        include/base_runtime/executor/runnable_circuit.hpp
+        include/base_runtime/executor/runnable_node.hpp
+        include/base_runtime/executor/tree_runner.hpp
+        include/base_runtime/executor/exception.hpp
 
-        include/crypto/exception.hpp
-        include/crypto/crypto.hpp
-        include/crypto/i_keyset.hpp
-        include/crypto/crypto_value.hpp
-        include/crypto/crypto_vector.hpp
-        include/crypto/crypto_factory.hpp
-
-        include/crypto/binfhe/binfhe.hpp
-        include/crypto/binfhe/detail/crypto.hpp
-        include/crypto/binfhe/detail/crypto_value.hpp
-        include/crypto/binfhe/detail/keyset.hpp
-
-        include/data_frame/data_frame.hpp
-        include/data_frame/data_frame_input.hpp
-        include/data_frame/data_frame_output.hpp
-
-        include/executor/executor.hpp
-        include/executor/runnable_circuit.hpp
-        include/executor/runnable_node.hpp
-        include/executor/tree_runner.hpp
-        include/executor/exception.hpp
-
-        include/mapper/circuit.hpp
+        include/base_runtime/mapper/circuit.hpp
 )
 
 target_compile_definitions(
-        executor_worker
+        worker_base_runtime
         PUBLIC
         MATHBACKEND=2
 )
 
 target_link_libraries(
-        executor_worker
+        worker_base_runtime
         PRIVATE
         options_target
         warnings_target
 )
 
 target_link_libraries(
-        executor_worker
+        worker_base_runtime
+        PUBLIC
+        herd_common
+        herd_proto
+        herd_dto_mappers
+)
+
+target_link_libraries(
+        worker_base_runtime
         PRIVATE
         pthread
 
@@ -169,14 +169,10 @@ target_link_libraries(
         OpenMP::OpenMP_CXX
 
         spdlog::spdlog_header_only
-
-        herd_proto
-        herd_common
-        herd_dto_mappers
 )
 
 target_include_directories(
-        executor_worker
+        worker_base_runtime
         SYSTEM PRIVATE
         ${OpenFHE_INCLUDE}
         ${OpenFHE_INCLUDE}/third-party/include
@@ -186,10 +182,40 @@ target_include_directories(
         ${UUID_INCLUDE_DIRS}
 )
 
-# Test
+option(BUILD_GRPC_RUNTIME "Enable GRPC Runtime" TRUE)
+if(BUILD_GRPC_RUNTIME)
+    add_executable(executor_worker)
 
-#option(ENABLE_TESTS "Enable tests" FALSE)
-#
-#if(ENABLE_TESTS)
-#    add_subdirectory(test)
-#endif()
+    target_include_directories(executor_worker PRIVATE include)
+
+    target_sources(
+            executor_worker
+            PRIVATE
+
+            src/grpc/main.cpp
+            src/grpc/controller/worker_controller.cpp
+
+            include/grpc/controller/worker_controller.hpp
+    )
+
+    target_link_libraries(
+            executor_worker
+            PRIVATE
+            options_target
+            warnings_target
+    )
+
+    target_link_libraries(
+            executor_worker
+            PRIVATE
+            pthread
+
+            worker_base_runtime
+
+            spdlog::spdlog_header_only
+
+            herd_proto
+            herd_common
+            herd_dto_mappers
+    )
+endif()
