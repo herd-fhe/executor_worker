@@ -9,6 +9,11 @@ struct ExecutorException: public std::runtime_error
 	using std::runtime_error::runtime_error;
 };
 
+struct MalformedTree: public ExecutorException
+{
+	using ExecutorException::ExecutorException;
+};
+
 struct WrongArgumentsCount: public ExecutorException
 {
 	using ExecutorException::ExecutorException;
