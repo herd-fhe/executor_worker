@@ -136,6 +136,8 @@ std::optional<TreeRunner::graph_node_t> TreeRunner::next_node(const std::stop_to
 		}
 	}
 
+	assert(!next.has_value() || next.value().value()->completed_parents == next.value().value()->parent_count);
+
 	return next;
 }
 
@@ -158,7 +160,7 @@ void TreeRunner::mark_node_completed(TreeRunner::graph_node_t node) noexcept
 
 		for(auto parents = node.parents(); auto& parent: parents)
 		{
-			auto& parent_counter = parent.value()->completed_parents;
+			auto& parent_counter = parent.value()->completed_children;
 			++parent_counter;
 
 			//clear buffer of already used dependencies
@@ -245,6 +247,7 @@ void TreeRunner::evaluate_operation(const TreeRunner::graph_node_t& graph_node)
 			throw WrongArgumentsCount("Wrong arguments count for unary operations");
 		}
 
+		assert(parents[0].value()->value != nullptr);
 		auto& input = *parents[0].value()->value;
 
 		graph_node.value()->value = crypto_->unary_op(operation_node.type, input);
@@ -256,6 +259,9 @@ void TreeRunner::evaluate_operation(const TreeRunner::graph_node_t& graph_node)
 		{
 			throw WrongArgumentsCount("Wrong arguments count for binary operations");
 		}
+
+		assert(parents[0].value()->value != nullptr);
+		assert(parents[1].value()->value != nullptr);
 
 		auto& input_a = *parents[0].value()->value;
 		auto& input_b = *parents[1].value()->value;
@@ -269,6 +275,10 @@ void TreeRunner::evaluate_operation(const TreeRunner::graph_node_t& graph_node)
 		{
 			throw WrongArgumentsCount("Wrong arguments count for ternary operations");
 		}
+
+		assert(parents[0].value()->value != nullptr);
+		assert(parents[1].value()->value != nullptr);
+		assert(parents[2].value()->value != nullptr);
 
 		auto& input_a = *parents[0].value()->value;
 		auto& input_b = *parents[1].value()->value;
@@ -300,6 +310,8 @@ void TreeRunner::evaluate_output(const TreeRunner::graph_node_t& graph_node)
 		throw OutOfRangeBitAccess("Out of range bit subscript for write operation");
 	}
 
+	assert(graph_node.parents()[0].value()->value != nullptr);
+
 	output_[tuple_index][bit_index] = crypto_->copy(*graph_node.parents()[0].value()->value);
 }
 
@@ -319,7 +331,7 @@ void TreeRunner::evaluate(const TreeRunner::graph_node_t& graph_node)
 	}
 	else if(std::holds_alternative<herd::common::OperationNode>(node))
 	{
-		spdlog::trace("Evaluating operation node");
+		spdlog::trace("Evaluating operation node({})", graph_node.node_id());
 		evaluate_operation(graph_node);
 	}
 	else if(std::holds_alternative<herd::common::OutputNode>(node))
