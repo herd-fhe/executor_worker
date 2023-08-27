@@ -112,7 +112,7 @@ grpc::Status WorkerController::reduce([[maybe_unused]] grpc::ServerContext* cont
 		executor.set_crypto(crypto::CryptoFactory::create_crypto(crypto_key_ptr, session_uuid, config_.key_base_dir));
 		for(std::size_t i = 0; i < input_data_frame_ptrs.size(); ++i)
 		{
-			executor.add_input(data::load_input(input_data_frame_ptrs[i], circuit.inputs[i], session_uuid, config_.storage_base_dir));
+			executor.add_input(data::load_input(input_data_frame_ptrs[i], circuit.inputs[0], session_uuid, config_.storage_base_dir));
 		}
 		executor.set_output(data::load_output(output_data_frame_ptr, circuit.output, session_uuid, config_.storage_base_dir));
 	}
