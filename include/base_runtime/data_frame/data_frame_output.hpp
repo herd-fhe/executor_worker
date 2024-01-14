@@ -17,9 +17,13 @@ namespace data
 		DataFrameOutput(const std::filesystem::path& data_frame_path, const std::vector<unsigned int>& columns);
 
 		void write_row(const std::vector<crypto::CryptoVector>& row, crypto::Crypto& crypto);
+		void finish();
 
 	private:
+		std::filesystem::path data_frame_path_;
 		std::ofstream data_frame_stream_;
+
+		bool finished_ = false;
 		std::vector<unsigned int> columns_;
 	};
 }

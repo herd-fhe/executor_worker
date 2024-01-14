@@ -45,6 +45,8 @@ void Executor::map()
 			spdlog::info("Row: {} processed", i);
 		}
 	}
+
+	output_->finish();
 	spdlog::info("Executor finished - map");
 }
 
@@ -68,7 +70,8 @@ void Executor::reduce()
 			spdlog::info("Row: {} processed", i);
 		}
 	}
-
 	output_->write_row(aggregated_value, *crypto_);
+
+	output_->finish();
 	spdlog::info("Executor finished - reduce");
 }
