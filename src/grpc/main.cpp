@@ -15,6 +15,9 @@ int main()
 
 	grpc::ServerBuilder builder;
 
+	builder.SetMaxSendMessageSize(32 * 1024 * 1024);
+	builder.SetMaxReceiveMessageSize(32 * 1024 * 1024);
+
 	const std::string address = std::string("0.0.0.0") + ":" + std::to_string(config.listening_port);
 	builder.AddListeningPort(address, grpc::InsecureServerCredentials());
 
